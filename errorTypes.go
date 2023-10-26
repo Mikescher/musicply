@@ -19,5 +19,6 @@ var (
 	ErrUnauthorized = exerr.TypeUnauthorized
 	ErrAuthFailed   = exerr.TypeAuthFailed
 
-	ErrJob = exerr.NewType("JOB", langext.Ptr(500))
+	ErrJob            = exerr.NewType("JOB", langext.Ptr(500))
+	ErrSourceNotFound = exerr.NewType("SOURCE_NOT_FOUND", langext.Ptr(400))
 )

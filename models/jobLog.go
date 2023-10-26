@@ -27,10 +27,6 @@ type JobLog struct {
 	Deleted        *rfctime.RFC3339NanoTime `bson:"deleted"       json:"deleted"`
 }
 
-func (u JobLog) GetID() AnyID {
-	return u.JobLogID.AsAny()
-}
-
 func (u JobLog) GetCreationTime() time.Time {
 	return u.Time.Time()
 }

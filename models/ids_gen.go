@@ -2,102 +2,259 @@
 
 package models
 
-import "go.mongodb.org/mongo-driver/bson"
-import "go.mongodb.org/mongo-driver/bson/bsontype"
-import "go.mongodb.org/mongo-driver/bson/primitive"
+import "crypto/rand"
+import "fmt"
+import "github.com/go-playground/validator/v10"
+import "github.com/rs/zerolog/log"
 import "gogs.mikescher.com/BlackForestBytes/goext/exerr"
+import "gogs.mikescher.com/BlackForestBytes/goext/langext"
+import "gogs.mikescher.com/BlackForestBytes/goext/rext"
+import "math/big"
+import "reflect"
+import "regexp"
+import "strings"
 
-const ChecksumIDGenerator = "dd32f55be165115a57f9af77b3461c4739e9b9026fbfe3e8368342cdc387f874" // GoExtVersion: 0.0.288
+const ChecksumCharsetIDGenerator = "1a2741c51942b52973b63984f4ad875e58571473aa5f190b79a912bf1fdc9b3e" // GoExtVersion: 0.0.291
 
-// ================================ AnyID (ids.go) ================================
+const idlen = 24
 
-func (i AnyID) MarshalBSONValue() (bsontype.Type, []byte, error) {
-	if objId, err := primitive.ObjectIDFromHex(string(i)); err == nil {
-		return bson.MarshalValue(objId)
-	} else {
-		return 0, nil, exerr.New(exerr.TypeMarshalEntityID, "Failed to marshal AnyID("+i.String()+") to ObjectId").Str("value", string(i)).Type("type", i).Build()
+const checklen = 1
+
+const idCharset = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+const idCharsetLen = len(idCharset)
+
+var charSetReverseMap = generateCharsetMap()
+
+const (
+	prefixJobLogID       = "JLG"
+	prefixJobExecutionID = "JEX"
+	prefixSourceID       = "SRC"
+	prefixTrackID        = "TRK"
+)
+
+var (
+	regexJobLogID       = generateRegex(prefixJobLogID)
+	regexJobExecutionID = generateRegex(prefixJobExecutionID)
+	regexSourceID       = generateRegex(prefixSourceID)
+	regexTrackID        = generateRegex(prefixTrackID)
+)
+
+func generateRegex(prefix string) rext.Regex {
+	return rext.W(regexp.MustCompile(fmt.Sprintf("^%s[%s]{%d}[%s]{%d}$", prefix, idCharset, idlen-len(prefix)-checklen, idCharset, checklen)))
+}
+
+func generateCharsetMap() []int {
+	result := make([]int, 128)
+	for i := 0; i < len(result); i++ {
+		result[i] = -1
 	}
+	for idx, chr := range idCharset {
+		result[int(chr)] = idx
+	}
+	return result
 }
 
-func (i AnyID) String() string {
-	return string(i)
+func generateID(prefix string) string {
+	k := ""
+	max := big.NewInt(int64(idCharsetLen))
+	checksum := 0
+	for i := 0; i < idlen-len(prefix)-checklen; i++ {
+		v, err := rand.Int(rand.Reader, max)
+		if err != nil {
+			panic(err)
+		}
+		v64 := v.Int64()
+		k += string(idCharset[v64])
+		checksum = (checksum + int(v64)) % (idCharsetLen)
+	}
+	checkstr := string(idCharset[checksum%idCharsetLen])
+	return prefix + k + checkstr
 }
 
-func (i AnyID) ObjID() (primitive.ObjectID, error) {
-	return primitive.ObjectIDFromHex(string(i))
+func validateID(prefix string, value string) error {
+	if len(value) != idlen {
+		return exerr.New(exerr.TypeInvalidCSID, "id has the wrong length").Str("value", value).Build()
+	}
+
+	if !strings.HasPrefix(value, prefix) {
+		return exerr.New(exerr.TypeInvalidCSID, "id is missing the correct prefix").Str("value", value).Str("prefix", prefix).Build()
+	}
+
+	checksum := 0
+	for i := len(prefix); i < len(value)-checklen; i++ {
+		ichr := int(value[i])
+		if ichr < 0 || ichr >= len(charSetReverseMap) || charSetReverseMap[ichr] == -1 {
+			return exerr.New(exerr.TypeInvalidCSID, "id contains invalid characters").Str("value", value).Build()
+		}
+		checksum = (checksum + charSetReverseMap[ichr]) % (idCharsetLen)
+	}
+
+	checkstr := string(idCharset[checksum%idCharsetLen])
+
+	if !strings.HasSuffix(value, checkstr) {
+		return exerr.New(exerr.TypeInvalidCSID, "id checkstring is invalid").Str("value", value).Str("checkstr", checkstr).Build()
+	}
+
+	return nil
 }
 
-func (i AnyID) Valid() bool {
-	_, err := primitive.ObjectIDFromHex(string(i))
-	return err == nil
+func getRawData(prefix string, value string) string {
+	if len(value) != idlen {
+		return ""
+	}
+	return value[len(prefix) : idlen-checklen]
 }
 
-func (i AnyID) AsAny() AnyID {
-	return AnyID(i)
+func getCheckString(prefix string, value string) string {
+	if len(value) != idlen {
+		return ""
+	}
+	return value[idlen-checklen:]
 }
 
-func NewAnyID() AnyID {
-	return AnyID(primitive.NewObjectID().Hex())
+func ValidateEntityID(vfl validator.FieldLevel) bool {
+	if !vfl.Field().CanInterface() {
+		log.Error().Msgf("Failed to validate EntityID (cannot interface ?!?)")
+		return false
+	}
+
+	ifvalue := vfl.Field().Interface()
+
+	if value1, ok := ifvalue.(EntityID); ok {
+
+		if vfl.Field().Type().Kind() == reflect.Pointer && langext.IsNil(value1) {
+			return true
+		}
+
+		if err := value1.Valid(); err != nil {
+			log.Debug().Msgf("Failed to validate EntityID '%s' (%s)", value1.String(), err.Error())
+			return false
+		} else {
+			return true
+		}
+
+	} else {
+		log.Error().Msgf("Failed to validate EntityID (wrong type: %T)", ifvalue)
+		return false
+	}
 }
 
 // ================================ JobLogID (ids.go) ================================
 
-func (i JobLogID) MarshalBSONValue() (bsontype.Type, []byte, error) {
-	if objId, err := primitive.ObjectIDFromHex(string(i)); err == nil {
-		return bson.MarshalValue(objId)
-	} else {
-		return 0, nil, exerr.New(exerr.TypeMarshalEntityID, "Failed to marshal JobLogID("+i.String()+") to ObjectId").Str("value", string(i)).Type("type", i).Build()
-	}
+func NewJobLogID() JobLogID {
+	return JobLogID(generateID(prefixJobLogID))
+}
+
+func (id JobLogID) Valid() error {
+	return validateID(prefixJobLogID, string(id))
 }
 
 func (i JobLogID) String() string {
 	return string(i)
 }
 
-func (i JobLogID) ObjID() (primitive.ObjectID, error) {
-	return primitive.ObjectIDFromHex(string(i))
+func (i JobLogID) Prefix() string {
+	return prefixJobLogID
 }
 
-func (i JobLogID) Valid() bool {
-	_, err := primitive.ObjectIDFromHex(string(i))
-	return err == nil
+func (id JobLogID) Raw() string {
+	return getRawData(prefixJobLogID, string(id))
 }
 
-func (i JobLogID) AsAny() AnyID {
-	return AnyID(i)
+func (id JobLogID) CheckString() string {
+	return getCheckString(prefixJobLogID, string(id))
 }
 
-func NewJobLogID() JobLogID {
-	return JobLogID(primitive.NewObjectID().Hex())
+func (id JobLogID) Regex() rext.Regex {
+	return regexJobLogID
 }
 
 // ================================ JobExecutionID (ids.go) ================================
 
-func (i JobExecutionID) MarshalBSONValue() (bsontype.Type, []byte, error) {
-	if objId, err := primitive.ObjectIDFromHex(string(i)); err == nil {
-		return bson.MarshalValue(objId)
-	} else {
-		return 0, nil, exerr.New(exerr.TypeMarshalEntityID, "Failed to marshal JobExecutionID("+i.String()+") to ObjectId").Str("value", string(i)).Type("type", i).Build()
-	}
+func NewJobExecutionID() JobExecutionID {
+	return JobExecutionID(generateID(prefixJobExecutionID))
+}
+
+func (id JobExecutionID) Valid() error {
+	return validateID(prefixJobExecutionID, string(id))
 }
 
 func (i JobExecutionID) String() string {
 	return string(i)
 }
 
-func (i JobExecutionID) ObjID() (primitive.ObjectID, error) {
-	return primitive.ObjectIDFromHex(string(i))
+func (i JobExecutionID) Prefix() string {
+	return prefixJobExecutionID
 }
 
-func (i JobExecutionID) Valid() bool {
-	_, err := primitive.ObjectIDFromHex(string(i))
-	return err == nil
+func (id JobExecutionID) Raw() string {
+	return getRawData(prefixJobExecutionID, string(id))
 }
 
-func (i JobExecutionID) AsAny() AnyID {
-	return AnyID(i)
+func (id JobExecutionID) CheckString() string {
+	return getCheckString(prefixJobExecutionID, string(id))
 }
 
-func NewJobExecutionID() JobExecutionID {
-	return JobExecutionID(primitive.NewObjectID().Hex())
+func (id JobExecutionID) Regex() rext.Regex {
+	return regexJobExecutionID
+}
+
+// ================================ SourceID (ids.go) ================================
+
+func NewSourceID() SourceID {
+	return SourceID(generateID(prefixSourceID))
+}
+
+func (id SourceID) Valid() error {
+	return validateID(prefixSourceID, string(id))
+}
+
+func (i SourceID) String() string {
+	return string(i)
+}
+
+func (i SourceID) Prefix() string {
+	return prefixSourceID
+}
+
+func (id SourceID) Raw() string {
+	return getRawData(prefixSourceID, string(id))
+}
+
+func (id SourceID) CheckString() string {
+	return getCheckString(prefixSourceID, string(id))
+}
+
+func (id SourceID) Regex() rext.Regex {
+	return regexSourceID
+}
+
+// ================================ TrackID (ids.go) ================================
+
+func NewTrackID() TrackID {
+	return TrackID(generateID(prefixTrackID))
+}
+
+func (id TrackID) Valid() error {
+	return validateID(prefixTrackID, string(id))
+}
+
+func (i TrackID) String() string {
+	return string(i)
+}
+
+func (i TrackID) Prefix() string {
+	return prefixTrackID
+}
+
+func (id TrackID) Raw() string {
+	return getRawData(prefixTrackID, string(id))
+}
+
+func (id TrackID) CheckString() string {
+	return getCheckString(prefixTrackID, string(id))
+}
+
+func (id TrackID) Regex() rext.Regex {
+	return regexTrackID
 }

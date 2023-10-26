@@ -23,10 +23,6 @@ type JobExecution struct {
 	Error          *string                  `bson:"error"         json:"error"`
 }
 
-func (u JobExecution) GetID() AnyID {
-	return u.JobExecutionID.AsAny()
-}
-
 func (u JobExecution) GetCreationTime() time.Time {
 	return u.StartTime.Time()
 }

@@ -7,7 +7,7 @@ require (
 	github.com/rs/xid v1.5.0
 	github.com/rs/zerolog v1.31.0
 	go.mongodb.org/mongo-driver v1.12.1
-	gogs.mikescher.com/BlackForestBytes/goext v0.0.288
+	gogs.mikescher.com/BlackForestBytes/goext v0.0.291
 )
 
 require (

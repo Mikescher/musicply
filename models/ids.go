@@ -1,21 +1,24 @@
 package models
 
 import (
-	"go.mongodb.org/mongo-driver/bson/bsontype"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"gogs.mikescher.com/BlackForestBytes/goext/rext"
 )
 
 //go:generate go run ../_gen/id-generate.go -- ids_gen.go
 
 type EntityID interface {
-	ObjID() (primitive.ObjectID, error)
 	String() string
-	MarshalBSONValue() (bsontype.Type, []byte, error)
-	AsAny() AnyID
+	Valid() error
+	Prefix() string
+	Raw() string
+	CheckString() string
+	Regex() rext.Regex
 }
 
-type AnyID string //@id:type
+type JobLogID string //@csid:type [JLG]
 
-type JobLogID string //@id:type
+type JobExecutionID string //@csid:type [JEX]
 
-type JobExecutionID string //@id:type
+type SourceID string //@csid:type [SRC]
+
+type TrackID string //@csid:type [TRK]

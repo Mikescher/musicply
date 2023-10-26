@@ -19,6 +19,10 @@ func main() {
 
 	app := logic.NewApp(appdb)
 
+	appdb.LoadSourcesFromEnv("SOURCE")
+
+	appdb.RefreshAllInitial()
+
 	ginengine := ginext.NewEngine(mply.Conf.Cors, mply.Conf.GinDebug, true, mply.Conf.RequestTimeout)
 
 	router := api.NewRouter(app)
