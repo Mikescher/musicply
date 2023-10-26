@@ -7,9 +7,10 @@ import (
 )
 
 type Track struct {
-	ID       TrackID
-	FileMeta TrackFileMeta
-	Tags     TrackTags
+	ID        TrackID
+	FileMeta  TrackFileMeta
+	AudioMeta TrackAudioMeta
+	Tags      TrackTags
 }
 
 type TrackFileMeta struct {
@@ -21,6 +22,15 @@ type TrackFileMeta struct {
 	ModTime   time.Time
 	CTime     *time.Time
 	ATime     *time.Time
+}
+
+type TrackAudioMeta struct {
+	Duration   float64
+	BitRate    float64
+	Channels   int
+	CodecShort string
+	CodecLong  string
+	Samplerate string
 }
 
 type TrackTags struct {

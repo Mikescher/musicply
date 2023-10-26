@@ -3,6 +3,8 @@ package db
 import (
 	"fmt"
 	"github.com/dhowden/tag"
+	"github.com/rs/zerolog/log"
+	"github.com/vansante/go-ffprobe"
 	"gogs.mikescher.com/BlackForestBytes/goext/dataext"
 	"gogs.mikescher.com/BlackForestBytes/goext/exerr"
 	"gogs.mikescher.com/BlackForestBytes/goext/fsext"
@@ -15,6 +17,7 @@ import (
 	"path"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 	"sync"
 	"syscall"
@@ -25,7 +28,7 @@ type Database struct {
 	sources []models.Source
 
 	tracks map[models.SourceID][]models.Track
-	lock   sync.Mutex
+	lock   sync.RWMutex
 }
 
 func NewDatabase() *Database {
@@ -38,7 +41,7 @@ func (db *Database) LoadSourcesFromEnv(envkey string) {
 
 	sourceList := make([]dataext.Tuple[string, string], 0)
 
-	regex := regexp.MustCompile(regexp.QuoteMeta(envkey) + `(_[0-9]+)?`)
+	regex := regexp.MustCompile(regexp.QuoteMeta(envkey) + `(_[0-9A-Za-z_]+)?`)
 
 	for _, v := range os.Environ() {
 
@@ -93,6 +96,12 @@ func (db *Database) loadSourceFromSingleEnv(key string, value string) error {
 
 		db.sources = append(db.sources, src)
 
+		if src.Recursive {
+			fmt.Printf("[%s] Initialize '%s' from source: '%s' (recursive)\n", key, src.Name, src.Path)
+		} else {
+			fmt.Printf("[%s] Initialize '%s' from source: '%s' (flat)\n", key, src.Name, src.Path)
+		}
+
 	} else {
 
 		exist, err := fsext.DirectoryExists(value)
@@ -120,7 +129,11 @@ func (db *Database) loadSourceFromSingleEnv(key string, value string) error {
 
 		db.sources = append(db.sources, src)
 
-		fmt.Printf("[%s] Initialize '%s' from source: '%s'\n", key, src.Name, src.Path)
+		if src.Recursive {
+			fmt.Printf("[%s] Initialize '%s' from source: '%s' (recursive)\n", key, src.Name, src.Path)
+		} else {
+			fmt.Printf("[%s] Initialize '%s' from source: '%s' (flat)\n", key, src.Name, src.Path)
+		}
 
 	}
 
@@ -130,7 +143,7 @@ func (db *Database) loadSourceFromSingleEnv(key string, value string) error {
 func (db *Database) RefreshAllInitial() {
 
 	fmt.Printf("\n")
-	fmt.Printf("================ INITIALIZE SOURCES ================\n")
+	fmt.Printf("================ ENUMERATE SOURCES ================\n")
 	fmt.Printf("\n")
 
 	for _, src := range db.sources {
@@ -181,62 +194,19 @@ func (db *Database) refreshSource(src models.Source) error {
 	})
 
 	tracks := make([]models.Track, 0, len(files))
-	for _, f := range files {
+	for _, fobj := range files {
 
-		var ctime *time.Time = nil
-		var atime *time.Time = nil
+		fp := fobj.V1
+		info := fobj.V2
 
-		if v, ok := f.V2.Sys().(*syscall.Stat_t); ok {
-			ctime = langext.Ptr(time.Unix(v.Ctim.Sec, v.Ctim.Nsec))
-			atime = langext.Ptr(time.Unix(v.Atim.Sec, v.Atim.Nsec))
-		}
-
-		fptr, err := os.OpenFile(f.V1, os.O_RDONLY, 0755)
+		track, err := db.analyzeAudioFile(fp, info)
 		if err != nil {
-			return err
+			log.Error().Msg(fmt.Sprintf("Failed to parse track from file '%s'", fp))
+			exerr.Wrap(err, "").Print()
+			continue
 		}
 
-		md, err := tag.ReadFrom(fptr)
-		_ = fptr.Close()
-		if err != nil {
-			return err
-		}
-
-		mdTrackIndex, mdTrackTotal := md.Track()
-		mdDiscIndex, mdDiscTotal := md.Disc()
-
-		tracks = append(tracks, models.Track{
-			ID: models.NewTrackID(),
-			FileMeta: models.TrackFileMeta{
-				Path:      f.V1,
-				Filename:  filepath.Base(f.V1),
-				Extension: strings.TrimLeft(filepath.Ext(strings.ToLower(filepath.Base(f.V1))), "."),
-				Size:      f.V2.Size(),
-				Filemode:  f.V2.Mode(),
-				ModTime:   f.V2.ModTime(),
-				CTime:     ctime,
-				ATime:     atime,
-			},
-			Tags: models.TrackTags{
-				Format:      md.Format(),
-				FileType:    md.FileType(),
-				Title:       md.Title(),
-				Album:       md.Album(),
-				Artist:      md.Artist(),
-				AlbumArtist: md.AlbumArtist(),
-				Composer:    md.Composer(),
-				Year:        md.Year(),
-				Genre:       md.Genre(),
-				TrackIndex:  mdTrackIndex,
-				TrackTotal:  mdTrackTotal,
-				DiscIndex:   mdDiscIndex,
-				DiscTotal:   mdDiscTotal,
-				Picture:     md.Picture(),
-				Lyrics:      md.Lyrics(),
-				Comment:     md.Comment(),
-				Raw:         md.Raw(),
-			},
-		})
+		tracks = append(tracks, track)
 	}
 
 	db.lock.Lock()
@@ -247,4 +217,88 @@ func (db *Database) refreshSource(src models.Source) error {
 	db.tracks[src.ID] = tracks
 
 	return nil
+}
+
+func (db *Database) analyzeAudioFile(fp string, info fs.FileInfo) (models.Track, error) {
+	var ctime *time.Time = nil
+	var atime *time.Time = nil
+
+	if v, ok := info.Sys().(*syscall.Stat_t); ok {
+		ctime = langext.Ptr(time.Unix(v.Ctim.Sec, v.Ctim.Nsec))
+		atime = langext.Ptr(time.Unix(v.Atim.Sec, v.Atim.Nsec))
+	}
+
+	fptr, err := os.OpenFile(fp, os.O_RDONLY, 0755)
+	if err != nil {
+		return models.Track{}, err
+	}
+
+	md, err := tag.ReadFrom(fptr)
+	_ = fptr.Close()
+	if err != nil {
+		return models.Track{}, exerr.Wrap(err, "failed to get audiofile tag-data").Build()
+	}
+
+	mdTrackIndex, mdTrackTotal := md.Track()
+	mdDiscIndex, mdDiscTotal := md.Disc()
+
+	pdata, err := ffprobe.GetProbeData(fp, 5*time.Second)
+	if err != nil {
+		return models.Track{}, exerr.Wrap(err, "failed to get audiofile ffprobe data").Build()
+	}
+
+	if pdata.Format == nil {
+		return models.Track{}, exerr.Wrap(err, "failed to get audiofile ffprobe data (no format)").Build()
+	}
+
+	astream := pdata.GetFirstAudioStream()
+	if astream == nil {
+		return models.Track{}, exerr.Wrap(err, "failed to get audiofile ffprobe data (no audio stream)").Build()
+	}
+
+	br, err := strconv.ParseFloat(pdata.Format.BitRate, 64)
+	if err != nil {
+		return models.Track{}, exerr.Wrap(err, "failed to get bitrate from ffprobe data").Str("astream.BitRate", astream.BitRate).Build()
+	}
+
+	return models.Track{
+		ID: models.NewTrackID(),
+		FileMeta: models.TrackFileMeta{
+			Path:      fp,
+			Filename:  filepath.Base(fp),
+			Extension: strings.TrimLeft(filepath.Ext(strings.ToLower(filepath.Base(fp))), "."),
+			Size:      info.Size(),
+			Filemode:  info.Mode(),
+			ModTime:   info.ModTime(),
+			CTime:     ctime,
+			ATime:     atime,
+		},
+		AudioMeta: models.TrackAudioMeta{
+			Duration:   pdata.Format.Duration().Seconds(),
+			BitRate:    br,
+			Channels:   astream.Channels,
+			CodecShort: astream.CodecName,
+			CodecLong:  astream.CodecLongName,
+			Samplerate: astream.SampleRate,
+		},
+		Tags: models.TrackTags{
+			Format:      md.Format(),
+			FileType:    md.FileType(),
+			Title:       md.Title(),
+			Album:       md.Album(),
+			Artist:      md.Artist(),
+			AlbumArtist: md.AlbumArtist(),
+			Composer:    md.Composer(),
+			Year:        md.Year(),
+			Genre:       md.Genre(),
+			TrackIndex:  mdTrackIndex,
+			TrackTotal:  mdTrackTotal,
+			DiscIndex:   mdDiscIndex,
+			DiscTotal:   mdDiscTotal,
+			Picture:     md.Picture(),
+			Lyrics:      md.Lyrics(),
+			Comment:     md.Comment(),
+			Raw:         md.Raw(),
+		},
+	}, nil
 }

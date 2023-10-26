@@ -8,6 +8,8 @@ DOCKER_GIT_INFO
 
 .swaggobin
 
+*.env
+
 ##############
 
 
