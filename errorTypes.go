@@ -21,4 +21,5 @@ var (
 
 	ErrJob            = exerr.NewType("JOB", langext.Ptr(500))
 	ErrSourceNotFound = exerr.NewType("SOURCE_NOT_FOUND", langext.Ptr(400))
+	ErrConfig         = exerr.NewType("CONFIG", langext.Ptr(400))
 )

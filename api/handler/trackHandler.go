@@ -3,6 +3,7 @@ package handler
 import (
 	"gogs.mikescher.com/BlackForestBytes/goext/ginext"
 	"mikescher.com/musicply/logic"
+	"mikescher.com/musicply/models"
 )
 
 type TrackHandler struct {
@@ -84,6 +85,10 @@ func (h TrackHandler) StreamPlaylistTrack(pctx ginext.PreContext) ginext.HTTPRes
 
 func (h TrackHandler) ListTracks(pctx ginext.PreContext) ginext.HTTPResponse {
 	type query struct {
+		Search string `form:"search"` //TODO
+	}
+	type response struct {
+		Tracks []models.Track `json:"tracks"`
 	}
 
 	var q query
@@ -93,7 +98,12 @@ func (h TrackHandler) ListTracks(pctx ginext.PreContext) ginext.HTTPResponse {
 	}
 	defer ctx.Cancel()
 
-	return ginext.NotImplemented()
+	tracks, err := h.app.Database.ListTracks(ctx)
+	if err != nil {
+		return ginext.Error(err)
+	}
+
+	return ginext.JSON(200, response{Tracks: tracks})
 }
 
 func (h TrackHandler) GetTrack(pctx ginext.PreContext) ginext.HTTPResponse {

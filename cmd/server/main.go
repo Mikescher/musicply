@@ -19,7 +19,7 @@ func main() {
 
 	app := logic.NewApp(appdb)
 
-	appdb.LoadSourcesFromEnv("SOURCE")
+	appdb.LoadSourcesFromEnv("SOURCES")
 
 	appdb.RefreshAllInitial()
 
