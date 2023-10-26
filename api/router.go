@@ -5,6 +5,7 @@ import (
 	"gogs.mikescher.com/BlackForestBytes/goext/ginext"
 	mply "mikescher.com/musicply"
 	"mikescher.com/musicply/api/handler"
+	"mikescher.com/musicply/html"
 	"mikescher.com/musicply/logic"
 	"mikescher.com/musicply/swagger"
 )
@@ -12,16 +13,18 @@ import (
 type Router struct {
 	app *logic.Application
 
-	commonHandler handler.CommonHandler
-	trackHandler  handler.TrackHandler
+	commonHandler  handler.CommonHandler
+	trackHandler   handler.TrackHandler
+	websiteHandler handler.WebsiteHandler
 }
 
 func NewRouter(app *logic.Application) *Router {
 	return &Router{
 		app: app,
 
-		commonHandler: handler.NewCommonHandler(app),
-		trackHandler:  handler.NewTrackHandler(app),
+		commonHandler:  handler.NewCommonHandler(app),
+		trackHandler:   handler.NewTrackHandler(app),
+		websiteHandler: handler.NewWebsiteHandler(app),
 	}
 }
 
@@ -51,6 +54,17 @@ func (r *Router) Init(e *ginext.GinWrapper) {
 	{
 		docs.GET("/swagger").Handle(ginext.RedirectTemporary("/documentation/swagger/"))
 		docs.GET("/swagger/*sub").Handle(swagger.Handle)
+	}
+
+	// ================ Website ================
+
+	website := e.Routes().Group("")
+	{
+		website.GET("/").Handle(r.websiteHandler.ServeIndexHTML)
+		website.GET("/index.html").Handle(r.websiteHandler.ServeIndexHTML)
+		for _, v := range html.ListAssets() {
+			website.GET(v).Handle(r.websiteHandler.ServeAssets)
+		}
 	}
 
 	// ================ API ================
