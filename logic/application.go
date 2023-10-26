@@ -7,6 +7,7 @@ import (
 	"gogs.mikescher.com/BlackForestBytes/goext/syncext"
 	mply "mikescher.com/musicply"
 	"mikescher.com/musicply/db"
+	"mikescher.com/musicply/webassets"
 	"net"
 	"os"
 	"os/signal"
@@ -18,15 +19,17 @@ type Application struct {
 	Config    mply.Config
 	Gin       *ginext.GinWrapper
 	Database  *db.Database
+	Assets    *webassets.Assets
 	Jobs      []Job
 	stopChan  chan bool
 	Port      string
 	IsRunning *syncext.AtomicBool
 }
 
-func NewApp(db *db.Database) *Application {
+func NewApp(db *db.Database, ass *webassets.Assets) *Application {
 	return &Application{
 		Database:  db,
+		Assets:    ass,
 		stopChan:  make(chan bool),
 		IsRunning: syncext.NewAtomicBool(false),
 	}

@@ -8,6 +8,7 @@ import (
 	"mikescher.com/musicply/api"
 	"mikescher.com/musicply/db"
 	"mikescher.com/musicply/logic"
+	"mikescher.com/musicply/webassets"
 )
 
 func main() {
@@ -17,7 +18,9 @@ func main() {
 
 	appdb := db.NewDatabase()
 
-	app := logic.NewApp(appdb)
+	assets := webassets.NewAssets()
+
+	app := logic.NewApp(appdb, assets)
 
 	appdb.LoadSourcesFromEnv("SOURCES")
 

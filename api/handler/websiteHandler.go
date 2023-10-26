@@ -6,7 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"gogs.mikescher.com/BlackForestBytes/goext/ginext"
 	"html/template"
-	"mikescher.com/musicply/html"
 	"mikescher.com/musicply/logic"
 	"mikescher.com/musicply/models"
 	"net/http"
@@ -15,18 +14,12 @@ import (
 
 type WebsiteHandler struct {
 	app *logic.Application
-
-	indexHTMLTemplate *template.Template
 }
 
 func NewWebsiteHandler(app *logic.Application) WebsiteHandler {
-	wh := WebsiteHandler{
+	return WebsiteHandler{
 		app: app,
 	}
-
-	wh.indexHTMLTemplate = wh.buildIndexHTMLTemplate()
-
-	return wh
 }
 
 func (h WebsiteHandler) ServeIndexHTML(pctx ginext.PreContext) ginext.HTTPResponse {
@@ -36,12 +29,17 @@ func (h WebsiteHandler) ServeIndexHTML(pctx ginext.PreContext) ginext.HTTPRespon
 	}
 	defer ctx.Cancel()
 
+	templ, err := h.app.Assets.Template("index.html", h.buildIndexHTMLTemplate)
+	if err != nil {
+		return ginext.Error(err)
+	}
+
 	data := map[string]any{
 		"RemoteIP": g.RemoteIP(),
 	}
 
 	bin := bytes.Buffer{}
-	err := h.indexHTMLTemplate.Execute(&bin, data)
+	err = templ.Execute(&bin, data)
 	if err != nil {
 		return ginext.Error(err)
 	}
@@ -68,7 +66,7 @@ func (h WebsiteHandler) ServeAssets(pctx ginext.PreContext) ginext.HTTPResponse 
 		u.Filename = "index.html"
 	}
 
-	data, err := html.Assets.ReadFile(u.Filename)
+	data, err := h.app.Assets.Read(u.Filename)
 	if err != nil {
 		return ginext.JSON(http.StatusNotFound, gin.H{"error": "AssetNotFound", "filename": u.Filename})
 	}
@@ -95,13 +93,8 @@ func (h WebsiteHandler) ServeAssets(pctx ginext.PreContext) ginext.HTTPResponse 
 	return ginext.Data(http.StatusOK, mime, data)
 }
 
-func (h WebsiteHandler) buildIndexHTMLTemplate() *template.Template {
+func (h WebsiteHandler) buildIndexHTMLTemplate(content []byte) (*template.Template, error) {
 	t := template.New("index.html")
-
-	content, err := html.Assets.ReadFile("index.html")
-	if err != nil {
-		panic(err)
-	}
 
 	t.Funcs(template.FuncMap{
 		"listPlaylists": func() []models.Playlist {
@@ -127,10 +120,10 @@ func (h WebsiteHandler) buildIndexHTMLTemplate() *template.Template {
 		},
 	})
 
-	_, err = t.Parse(string(content))
+	_, err := t.Parse(string(content))
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
-	return t
+	return t, nil
 }

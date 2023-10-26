@@ -5,7 +5,6 @@ import (
 	"gogs.mikescher.com/BlackForestBytes/goext/ginext"
 	mply "mikescher.com/musicply"
 	"mikescher.com/musicply/api/handler"
-	"mikescher.com/musicply/html"
 	"mikescher.com/musicply/logic"
 	"mikescher.com/musicply/swagger"
 )
@@ -62,7 +61,7 @@ func (r *Router) Init(e *ginext.GinWrapper) {
 	{
 		website.GET("/").Handle(r.websiteHandler.ServeIndexHTML)
 		website.GET("/index.html").Handle(r.websiteHandler.ServeIndexHTML)
-		for _, v := range html.ListAssets() {
+		for _, v := range r.app.Assets.ListAssets() {
 			website.GET(v).Handle(r.websiteHandler.ServeAssets)
 		}
 	}

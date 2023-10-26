@@ -20,6 +20,7 @@ type Config struct {
 	ServerPort      string        `env:"SERVER_PORT"`
 	RequestTimeout  time.Duration `env:"REQUEST_TIMEOUT"`
 	Cors            bool          `env:"CORS"`
+	LiveReload      *string       `env:"LIVE_RELOAD"`
 }
 
 var defaultConf = Config{
@@ -32,6 +33,7 @@ var defaultConf = Config{
 	RequestTimeout:  16 * time.Second,
 	LogLevel:        zerolog.DebugLevel,
 	Cors:            true,
+	LiveReload:      nil,
 }
 
 var allConfigs = map[string]Config{
