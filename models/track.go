@@ -4,18 +4,39 @@ import (
 	"github.com/dhowden/tag"
 	"gogs.mikescher.com/BlackForestBytes/goext/rfctime"
 	"io/fs"
+	"strings"
 )
 
 type Track struct {
-	ID        TrackID        `json:"id"`
-	SourceID  SourceID       `json:"sourceID"`
-	FileMeta  TrackFileMeta  `json:"fileMeta"`
-	AudioMeta TrackAudioMeta `json:"audioMeta"`
-	Tags      TrackTags      `json:"tags"`
+	ID         TrackID        `json:"id"`
+	SourceID   SourceID       `json:"sourceID"`
+	PlaylistID PlaylistID     `json:"playlistID"`
+	Path       string         `json:"path"`
+	FileMeta   TrackFileMeta  `json:"fileMeta"`
+	AudioMeta  TrackAudioMeta `json:"audioMeta"`
+	Tags       TrackTags      `json:"tags"`
+}
+
+func (t Track) Mimetype() string {
+	for _, v := range strings.Split(t.AudioMeta.CodecShort, ",") {
+		if strings.EqualFold(v, "mp3") {
+			return "audio/mpeg"
+		}
+		if strings.EqualFold(v, "flac") {
+			return "audio/flac"
+		}
+		if strings.EqualFold(v, "m4a") {
+			return "audio/mp4"
+		}
+	}
+	if strings.EqualFold(t.FileMeta.Extension, "asf") {
+		return "audio/x-ms-wma"
+	}
+
+	return "application/octet-stream"
 }
 
 type TrackFileMeta struct {
-	Path      string                   `json:"path"`
 	Filename  string                   `json:"filename"`
 	Extension string                   `json:"extension"`
 	Size      int64                    `json:"size"`

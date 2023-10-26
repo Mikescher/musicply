@@ -8,12 +8,16 @@ import (
 type Database struct {
 	sources []models.Source
 
-	tracks map[models.SourceID][]models.Track
-	lock   sync.RWMutex
+	playlists map[models.PlaylistID]models.Playlist
+	tracks    map[models.PlaylistID]map[models.TrackID]models.Track
+	lock      sync.RWMutex
 }
 
 func NewDatabase() *Database {
 	return &Database{
-		tracks: make(map[models.SourceID][]models.Track),
+		sources:   make([]models.Source, 0),
+		tracks:    make(map[models.PlaylistID]map[models.TrackID]models.Track),
+		playlists: make(map[models.PlaylistID]models.Playlist),
+		lock:      sync.RWMutex{},
 	}
 }

@@ -144,6 +144,7 @@ func (db *Database) RefreshAllInitial() {
 	fmt.Printf("\n")
 
 	for _, src := range db.sources {
+
 		err := db.refreshSource(src)
 		if err != nil {
 			exerr.Wrap(err, "").Fatal()
@@ -209,9 +210,50 @@ func (db *Database) refreshSource(src models.Source) error {
 	db.lock.Lock()
 	defer db.lock.Unlock()
 
-	fmt.Printf("Found %d tracks in source '%s'\n", len(tracks), src.Name)
+	playlists := make([]dataext.Tuple[models.Playlist, []models.Track], 0)
+	if len(tracks) > 0 {
 
-	db.tracks[src.ID] = tracks
+		existing := langext.ArrFirstOrNil(langext.MapValueArr(db.playlists), func(pl models.Playlist) bool { return pl.SourceID == src.ID })
+
+		plid := models.NewPlaylistID()
+
+		existingTrackmap := make(map[string]models.TrackID)
+		for _, v := range db.tracks[plid] {
+			existingTrackmap[v.Path] = v.ID
+		}
+
+		if existing != nil {
+			plid = existing.ID
+		}
+
+		plst := models.Playlist{
+			ID:       plid,
+			SourceID: src.ID,
+			Name:     src.Name,
+		}
+
+		pltracks := tracks
+		for i := 0; i < len(pltracks); i++ {
+			if v, ok := existingTrackmap[pltracks[i].Path]; ok {
+				pltracks[i].ID = v
+			}
+			pltracks[i].PlaylistID = plst.ID
+		}
+
+		playlists = append(playlists, dataext.Tuple[models.Playlist, []models.Track]{V1: plst, V2: pltracks})
+	}
+
+	for _, v := range langext.ArrFilter(langext.MapValueArr(db.playlists), func(pl models.Playlist) bool { return pl.SourceID == src.ID }) {
+		delete(db.playlists, v.ID)
+		delete(db.tracks, v.ID)
+	}
+
+	fmt.Printf("Found %d tracks and %d playlists in source '%s'\n", len(tracks), len(playlists), src.Name)
+
+	for _, v := range playlists {
+		db.playlists[v.V1.ID] = v.V1
+		db.tracks[v.V1.ID] = langext.ArrToMap(v.V2, func(v models.Track) models.TrackID { return v.ID })
+	}
 
 	return nil
 }
@@ -236,6 +278,7 @@ func (db *Database) analyzeAudioFile(srcid models.SourceID, fp string, info fs.F
 	return models.Track{
 		ID:        models.NewTrackID(),
 		SourceID:  srcid,
+		Path:      fp,
 		FileMeta:  fm,
 		AudioMeta: am,
 		Tags:      tt,
@@ -259,7 +302,6 @@ func (db *Database) getFileMeta(fp string, info fs.FileInfo) (models.TrackFileMe
 	}
 
 	return models.TrackFileMeta{
-		Path:      fp,
 		Filename:  filepath.Base(fp),
 		Extension: strings.TrimLeft(filepath.Ext(strings.ToLower(filepath.Base(fp))), "."),
 		Size:      info.Size(),

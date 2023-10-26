@@ -58,13 +58,11 @@ func (r *Router) Init(e *ginext.GinWrapper) {
 	api.GET("/playlists").Handle(r.trackHandler.ListPlaylists)
 	api.GET("/playlists/:plid").Handle(r.trackHandler.GetPlaylist)
 	api.GET("/playlists/:plid/tracks").Handle(r.trackHandler.ListPlaylistTracks)
-	api.GET("/playlists/:plid/tracks/:trackid").Handle(r.trackHandler.GetPlaylistTrack)
-	api.GET("/playlists/:plid/tracks/:trackid/stream").Handle(r.trackHandler.StreamPlaylistTrack)
-	api.GET("/playlists/:plid/tracks/:trackid/cover").Handle(r.trackHandler.StreamPlaylistTrack)
+	api.GET("/playlists/:plid/tracks/:trackid").Handle(r.trackHandler.GetTrack)
+	api.GET("/playlists/:plid/tracks/:trackid/stream").Handle(r.trackHandler.StreamTrack)
+	api.GET("/playlists/:plid/tracks/:trackid/cover").Handle(r.trackHandler.StreamTrack)
 
 	api.GET("/tracks").Handle(r.trackHandler.ListTracks)
-
-	api.GET("/tracks/:trackid/stream").Handle(r.trackHandler.StreamTrack)
 
 	// ================  ================
 

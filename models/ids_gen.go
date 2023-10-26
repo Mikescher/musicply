@@ -14,7 +14,7 @@ import "reflect"
 import "regexp"
 import "strings"
 
-const ChecksumCharsetIDGenerator = "767fbd1b356150f73246cf075ea9a22a8e485784495e87d15d2e5d6fc0fde0e9" // GoExtVersion: 0.0.291
+const ChecksumCharsetIDGenerator = "fd466b39aa1a2c0a7879e9f034913e2165e61396d2e3bbbf907c0019f460b67c" // GoExtVersion: 0.0.291
 
 const idlen = 24
 
@@ -29,6 +29,7 @@ const (
 	prefixJobLogID       = "JLG"
 	prefixJobExecutionID = "JEX"
 	prefixSourceID       = "SRC"
+	prefixPlaylistID     = "PLS"
 	prefixTrackID        = "TRK"
 )
 
@@ -36,6 +37,7 @@ var (
 	regexJobLogID       = generateRegex(prefixJobLogID)
 	regexJobExecutionID = generateRegex(prefixJobExecutionID)
 	regexSourceID       = generateRegex(prefixSourceID)
+	regexPlaylistID     = generateRegex(prefixPlaylistID)
 	regexTrackID        = generateRegex(prefixTrackID)
 )
 
@@ -227,6 +229,36 @@ func (id SourceID) CheckString() string {
 
 func (id SourceID) Regex() rext.Regex {
 	return regexSourceID
+}
+
+// ================================ PlaylistID (ids.go) ================================
+
+func NewPlaylistID() PlaylistID {
+	return PlaylistID(generateID(prefixPlaylistID))
+}
+
+func (id PlaylistID) Valid() error {
+	return validateID(prefixPlaylistID, string(id))
+}
+
+func (i PlaylistID) String() string {
+	return string(i)
+}
+
+func (i PlaylistID) Prefix() string {
+	return prefixPlaylistID
+}
+
+func (id PlaylistID) Raw() string {
+	return getRawData(prefixPlaylistID, string(id))
+}
+
+func (id PlaylistID) CheckString() string {
+	return getCheckString(prefixPlaylistID, string(id))
+}
+
+func (id PlaylistID) Regex() rext.Regex {
+	return regexPlaylistID
 }
 
 // ================================ TrackID (ids.go) ================================
