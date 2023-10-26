@@ -2,6 +2,7 @@ package db
 
 import (
 	"fmt"
+	"github.com/dhowden/tag"
 	"gogs.mikescher.com/BlackForestBytes/goext/dataext"
 	"gogs.mikescher.com/BlackForestBytes/goext/exerr"
 	"gogs.mikescher.com/BlackForestBytes/goext/fsext"
@@ -190,14 +191,51 @@ func (db *Database) refreshSource(src models.Source) error {
 			atime = langext.Ptr(time.Unix(v.Atim.Sec, v.Atim.Nsec))
 		}
 
+		fptr, err := os.OpenFile(f.V1, os.O_RDONLY, 0755)
+		if err != nil {
+			return err
+		}
+
+		md, err := tag.ReadFrom(fptr)
+		_ = fptr.Close()
+		if err != nil {
+			return err
+		}
+
+		mdTrackIndex, mdTrackTotal := md.Track()
+		mdDiscIndex, mdDiscTotal := md.Disc()
+
 		tracks = append(tracks, models.Track{
-			ID:       models.NewTrackID(),
-			Path:     f.V1,
-			Size:     f.V2.Size(),
-			Filemode: f.V2.Mode(),
-			ModTime:  f.V2.ModTime(),
-			CTime:    ctime,
-			ATime:    atime,
+			ID: models.NewTrackID(),
+			FileMeta: models.TrackFileMeta{
+				Path:      f.V1,
+				Filename:  filepath.Base(f.V1),
+				Extension: strings.TrimLeft(filepath.Ext(strings.ToLower(filepath.Base(f.V1))), "."),
+				Size:      f.V2.Size(),
+				Filemode:  f.V2.Mode(),
+				ModTime:   f.V2.ModTime(),
+				CTime:     ctime,
+				ATime:     atime,
+			},
+			Tags: models.TrackTags{
+				Format:      md.Format(),
+				FileType:    md.FileType(),
+				Title:       md.Title(),
+				Album:       md.Album(),
+				Artist:      md.Artist(),
+				AlbumArtist: md.AlbumArtist(),
+				Composer:    md.Composer(),
+				Year:        md.Year(),
+				Genre:       md.Genre(),
+				TrackIndex:  mdTrackIndex,
+				TrackTotal:  mdTrackTotal,
+				DiscIndex:   mdDiscIndex,
+				DiscTotal:   mdDiscTotal,
+				Picture:     md.Picture(),
+				Lyrics:      md.Lyrics(),
+				Comment:     md.Comment(),
+				Raw:         md.Raw(),
+			},
 		})
 	}
 
