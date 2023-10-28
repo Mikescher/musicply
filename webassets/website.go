@@ -78,16 +78,16 @@ func (a *Assets) Read(fp string) ([]byte, error) {
 
 	} else {
 
-		a.lock.RLock()
-		v, ok := a.fileCache[fp]
-		a.lock.RUnlock()
-
 		liveFP := filepath.Join(*mply.Conf.LiveReload, fp)
 
 		stat, err := os.Stat(liveFP)
 		if err != nil {
 			return nil, err
 		}
+
+		a.lock.RLock()
+		v, ok := a.fileCache[fp]
+		a.lock.RUnlock()
 
 		if !ok {
 

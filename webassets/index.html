@@ -6,12 +6,130 @@
     <title>MusicPly</title>
 
     <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="stylesheet" type="text/css" href="/reset.css" />
     <link rel="stylesheet" type="text/css" href="/styles.css" />
     <script type="text/javascript" src="/knockout-3.5.1.js"></script>
 </head>
 
 <body>
-    Hello {{ .RemoteIP }}
+
+    <main>
+
+        <div class="container_left">
+
+            <div class="left_header">
+
+                <img src="logo.png" alt="logo">
+                <span class="title">MusicPly</span>
+
+            </div>
+
+            <div class="container_playlists">
+
+                <div class="item level-1 entry normal"><span class="title">98' Gen-X</span></div>
+                <div class="item level-1 entry normal"><span class="title">Bloodhound Gang</span></div>
+                <div class="item level-1 entry expand"><span class="title">Die Ärzte</span></div>
+                <div class="item level-1 children">
+                    <div class="item level-2 entry normal"><span class="title">Im Schatten der Ärzte</span></div>
+                    <div class="item level-2 entry normal active"><span class="title">13</span></div>
+                    <div class="item level-2 entry normal"><span class="title">Jazz ist anders</span></div>
+                </div>
+
+            </div>
+
+            <div class="left_footer">
+
+                <a class="button" draggable="false" href="https://ebooks.zeugs.xyz"     title="Ebooks"    ><img alt="ebooks"     src="/icon_ebk.png"     ><span> Ebooks</span></a>
+                <a class="button" draggable="false" href="https://audiobooks.zeugs.xyz" title="Audiobooks"><img alt="audiobooks" src="/icon_audio.png"   ><span> Audiobooks</span></a>
+                <a class="button" draggable="false" href="https://clipcorn.zeugs.xyz"   title="Movies"    ><img alt="clipcorn"   src="/icon_jcc.png"     ><span> Movies</span></a>
+                <a class="button" draggable="false" href="https://opds.zeugs.xyz"       title="Calibre"   ><img alt="opds"       src="/icon_opds.png"    ><span> Calibre</span></a>
+                <a class="button" draggable="false" href="https://music.zeugs.xyz"      title="MusicPly"  ><img alt="opds"       src="/icon_musicply.png"><span> Music</span></a>
+
+            </div>
+
+        </div>
+
+        <div class="container_tracks">
+
+            <div class="track">
+                <span class="track_id">TRKlMIuib77puuwe6IkwCq2B</span>
+                <span class="source_id">SRC8NcqsUFVykLNhXEIB9si7</span>
+                <span class="playlist_id">PLSt16Co0FcAqxPxpDrmfVFE</span>
+                <img class="cover" alt="cover" src="no_cover.png">
+                <span class="title">I Hope You Die</span>
+                <span class="album">Hooray For Boobies</span>
+                <span class="artist">Bloodhound Gang</span>
+                <span class="genre">Alternative</span>
+                <span class="year">2000</span>
+                <span class="track">1 / 19</span>
+                <span class="length">3:39</span>
+                <span class="codec">MP3</span>
+                <span class="samplerate">44100</span>
+                <span class="bitrate">320.156</span>
+                <span class="channels">2</span>
+                <span class="ctime">2023-10-28</span>
+                <span class="size">9.54 MB</span>
+
+
+                <button class="btn_play"  ><img src="/icn_play.svg"    alt="play"></button>
+                <button class="btn_equeue"><img src="/icn_enqueue.svg" alt="enqueue"></button>
+            </div>
+
+        </div>
+
+        <div class="container_queue">
+
+            <div class="queue">
+
+                <div class="queue_item past">
+                    <span class="title">Mama's Boy</span>
+                    <span class="length">3:39</span>
+                </div>
+
+                <div class="queue_item past">
+                    <span class="title">The Inevitable Return Of The Great White Dope</span>
+                    <span class="length">3:39</span>
+                </div>
+
+                <div class="queue_item active">
+
+                    <img class="cover" alt="cover" src="no_cover.png">
+
+                    <span class="title">I Hope You Die</span>
+                    <span class="album">Hooray For Boobies</span>
+                    <span class="artist">Bloodhound Gang</span>
+
+                    <input id="range26" type="range" min="1" max="11" value="5">
+                    <span class="length">3:39</span>
+
+                    <img src="/icn_pause.svg" alt="play">
+                </div>
+
+                <div class="queue_item future">
+                    <span class="title">Three Point One Four</span>
+                    <span class="length">3:39</span>
+                </div>
+
+            </div>
+
+            <div class="queue_footer">
+                <button>Clear</button>
+                <button>Pause</button>
+            </div>
+
+        </div>
+
+    </main>
+
+    <footer>
+        <span class="footer-cell branch_name">{{ .BranchName }}</span>
+        <span class="footer-cell commit_time">{{ .CommitTime }}</span>
+        <span class="footer-cell commit_hash">{{ .CommitHash }}</span>
+        <span class="footer-cell grow"></span>
+        <span class="footer-cell name">MusicPly</span>
+    </footer>
+
+
 </body>
 
 </html>

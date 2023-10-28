@@ -61,9 +61,9 @@ func (r *Router) Init(e *ginext.GinWrapper) {
 	{
 		website.GET("/").Handle(r.websiteHandler.ServeIndexHTML)
 		website.GET("/index.html").Handle(r.websiteHandler.ServeIndexHTML)
-		for _, v := range r.app.Assets.ListAssets() {
-			website.GET(v).Handle(r.websiteHandler.ServeAssets)
-		}
+		website.GET("/:fp1").Handle(r.websiteHandler.ServeAssets)
+		website.GET("/:fp1/:fp2").Handle(r.websiteHandler.ServeAssets)
+		website.GET("/:fp1/:fp2/:fp3").Handle(r.websiteHandler.ServeAssets)
 	}
 
 	// ================ API ================

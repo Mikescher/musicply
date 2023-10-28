@@ -6,9 +6,11 @@ import (
 	"github.com/gin-gonic/gin"
 	"gogs.mikescher.com/BlackForestBytes/goext/ginext"
 	"html/template"
+	mply "mikescher.com/musicply"
 	"mikescher.com/musicply/logic"
 	"mikescher.com/musicply/models"
 	"net/http"
+	"path/filepath"
 	"strings"
 )
 
@@ -35,7 +37,12 @@ func (h WebsiteHandler) ServeIndexHTML(pctx ginext.PreContext) ginext.HTTPRespon
 	}
 
 	data := map[string]any{
-		"RemoteIP": g.RemoteIP(),
+		"RemoteIP":   g.RemoteIP(),
+		"BranchName": mply.BranchName,
+		"CommitTime": mply.CommitTime,
+		"VCSType":    mply.VCSType,
+		"CommitHash": mply.CommitHash,
+		"APILevel":   mply.APILevel,
 	}
 
 	bin := bytes.Buffer{}
@@ -49,7 +56,9 @@ func (h WebsiteHandler) ServeIndexHTML(pctx ginext.PreContext) ginext.HTTPRespon
 
 func (h WebsiteHandler) ServeAssets(pctx ginext.PreContext) ginext.HTTPResponse {
 	type uri struct {
-		Filename string `uri:"sub"`
+		FP1 *string `uri:"fp1"`
+		FP2 *string `uri:"fp2"`
+		FP3 *string `uri:"fp3"`
 	}
 
 	var u uri
@@ -60,20 +69,25 @@ func (h WebsiteHandler) ServeAssets(pctx ginext.PreContext) ginext.HTTPResponse 
 	}
 	defer ctx.Cancel()
 
-	u.Filename = strings.TrimLeft(u.Filename, "/")
-
-	if u.Filename == "" {
-		u.Filename = "index.html"
+	assetpath := ""
+	if u.FP1 == nil && u.FP2 == nil && u.FP3 == nil {
+		assetpath = filepath.Join()
+	} else if u.FP2 == nil && u.FP3 == nil {
+		assetpath = filepath.Join(*u.FP1)
+	} else if u.FP3 == nil {
+		assetpath = filepath.Join(*u.FP1, *u.FP2)
+	} else {
+		assetpath = filepath.Join(*u.FP1, *u.FP2, *u.FP3)
 	}
 
-	data, err := h.app.Assets.Read(u.Filename)
+	data, err := h.app.Assets.Read(assetpath)
 	if err != nil {
-		return ginext.JSON(http.StatusNotFound, gin.H{"error": "AssetNotFound", "filename": u.Filename})
+		return ginext.JSON(http.StatusNotFound, gin.H{"error": "AssetNotFound", "assetpath": assetpath})
 	}
 
 	mime := "text/plain"
 
-	lowerFN := strings.ToLower(u.Filename)
+	lowerFN := strings.ToLower(assetpath)
 	if strings.HasSuffix(lowerFN, ".html") || strings.HasSuffix(lowerFN, ".htm") {
 		mime = "text/html"
 	} else if strings.HasSuffix(lowerFN, ".css") {
