@@ -26,6 +26,8 @@
 
             <div class="container_playlists">
 
+                <div class="item level-1 entry normal"><span class="title">Alle</span></div>
+
                 <div class="item level-1 entry normal"><span class="title">98' Gen-X</span></div>
                 <div class="item level-1 entry normal"><span class="title">Bloodhound Gang</span></div>
                 <div class="item level-1 entry expand"><span class="title">Die Ärzte</span></div>
@@ -182,10 +184,8 @@
                     <span class="album">Hooray For Boobies</span>
                     <span class="artist">Bloodhound Gang</span>
 
-                    <input id="range26" type="range" min="1" max="11" value="5">
+                    <input class="range" type="range" min="1" max="11" value="5">
                     <span class="length">3:39</span>
-
-                    <img src="/icn_pause.svg" alt="play">
                 </div>
 
                 <div class="queue_item future">
@@ -196,8 +196,9 @@
             </div>
 
             <div class="queue_footer">
-                <button>Clear</button>
-                <button>Pause</button>
+                <button class="btn btn_clear"    ><img src="/icn_clear.svg"  alt="play"><span>Clear</span></button>
+                <div class="grow"></div>
+                <button class="btn btn_playpause"><img src="/icn_pause.svg"  alt="pause"></button>
             </div>
 
         </div>
