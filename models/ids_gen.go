@@ -14,7 +14,7 @@ import "reflect"
 import "regexp"
 import "strings"
 
-const ChecksumCharsetIDGenerator = "fd466b39aa1a2c0a7879e9f034913e2165e61396d2e3bbbf907c0019f460b67c" // GoExtVersion: 0.0.291
+const ChecksumCharsetIDGenerator = "78a92b01f5b3377955e153ce029ecf6f836f710603f381c6160ebbda557bbbd3" // GoExtVersion: 0.0.291
 
 const idlen = 24
 
@@ -31,6 +31,7 @@ const (
 	prefixSourceID       = "SRC"
 	prefixPlaylistID     = "PLS"
 	prefixTrackID        = "TRK"
+	prefixFooterLinkID   = "FLK"
 )
 
 var (
@@ -39,6 +40,7 @@ var (
 	regexSourceID       = generateRegex(prefixSourceID)
 	regexPlaylistID     = generateRegex(prefixPlaylistID)
 	regexTrackID        = generateRegex(prefixTrackID)
+	regexFooterLinkID   = generateRegex(prefixFooterLinkID)
 )
 
 func generateRegex(prefix string) rext.Regex {
@@ -289,4 +291,34 @@ func (id TrackID) CheckString() string {
 
 func (id TrackID) Regex() rext.Regex {
 	return regexTrackID
+}
+
+// ================================ FooterLinkID (ids.go) ================================
+
+func NewFooterLinkID() FooterLinkID {
+	return FooterLinkID(generateID(prefixFooterLinkID))
+}
+
+func (id FooterLinkID) Valid() error {
+	return validateID(prefixFooterLinkID, string(id))
+}
+
+func (i FooterLinkID) String() string {
+	return string(i)
+}
+
+func (i FooterLinkID) Prefix() string {
+	return prefixFooterLinkID
+}
+
+func (id FooterLinkID) Raw() string {
+	return getRawData(prefixFooterLinkID, string(id))
+}
+
+func (id FooterLinkID) CheckString() string {
+	return getCheckString(prefixFooterLinkID, string(id))
+}
+
+func (id FooterLinkID) Regex() rext.Regex {
+	return regexFooterLinkID
 }

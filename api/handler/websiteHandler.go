@@ -37,12 +37,13 @@ func (h WebsiteHandler) ServeIndexHTML(pctx ginext.PreContext) ginext.HTTPRespon
 	}
 
 	data := map[string]any{
-		"RemoteIP":   g.RemoteIP(),
-		"BranchName": mply.BranchName,
-		"CommitTime": mply.CommitTime,
-		"VCSType":    mply.VCSType,
-		"CommitHash": mply.CommitHash,
-		"APILevel":   mply.APILevel,
+		"RemoteIP":    g.RemoteIP(),
+		"BranchName":  mply.BranchName,
+		"CommitTime":  mply.CommitTime,
+		"VCSType":     mply.VCSType,
+		"CommitHash":  mply.CommitHash,
+		"APILevel":    mply.APILevel,
+		"FooterLinks": h.app.Assets.ListFooterLinks(),
 	}
 
 	bin := bytes.Buffer{}
@@ -140,4 +141,39 @@ func (h WebsiteHandler) buildIndexHTMLTemplate(content []byte) (*template.Templa
 	}
 
 	return t, nil
+}
+
+func (h WebsiteHandler) GetFooterLinkIcon(pctx ginext.PreContext) ginext.HTTPResponse {
+	type uri struct {
+		ID models.FooterLinkID `uri:"id"`
+	}
+
+	var u uri
+
+	ctx, _, errResp := pctx.URI(&u).Start()
+	if errResp != nil {
+		return *errResp
+	}
+	defer ctx.Cancel()
+
+	fl := h.app.Assets.GetFooterLink(u.ID)
+
+	if fl == nil {
+		return ginext.JSON(http.StatusNotFound, gin.H{"error": "AssetNotFound", "id": u.ID})
+	}
+
+	mime := "application/octet-stream"
+
+	lowerFN := strings.ToLower(fl.IconPath)
+	if strings.HasSuffix(lowerFN, ".jpeg") || strings.HasSuffix(lowerFN, ".jpg") {
+		mime = "image/jpeg"
+	} else if strings.HasSuffix(lowerFN, ".png") {
+		mime = "image/png"
+	} else if strings.HasSuffix(lowerFN, ".gif") {
+		mime = "image/gif"
+	} else if strings.HasSuffix(lowerFN, ".svg") {
+		mime = "image/svg+xml"
+	}
+
+	return ginext.Data(http.StatusOK, mime, fl.IconData)
 }

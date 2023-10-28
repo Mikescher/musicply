@@ -64,6 +64,8 @@ func (r *Router) Init(e *ginext.GinWrapper) {
 		website.GET("/:fp1").Handle(r.websiteHandler.ServeAssets)
 		website.GET("/:fp1/:fp2").Handle(r.websiteHandler.ServeAssets)
 		website.GET("/:fp1/:fp2/:fp3").Handle(r.websiteHandler.ServeAssets)
+
+		website.GET("/footerlinks/:id/icon").Handle(r.websiteHandler.GetFooterLinkIcon)
 	}
 
 	// ================ API ================

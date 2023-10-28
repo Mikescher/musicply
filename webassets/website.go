@@ -5,10 +5,16 @@ import (
 	_ "embed"
 	"fmt"
 	"github.com/rs/zerolog/log"
+	"gogs.mikescher.com/BlackForestBytes/goext/exerr"
+	"gogs.mikescher.com/BlackForestBytes/goext/langext"
+	"gogs.mikescher.com/BlackForestBytes/goext/rext"
 	"html/template"
 	mply "mikescher.com/musicply"
+	"mikescher.com/musicply/models"
 	"os"
 	"path/filepath"
+	"regexp"
+	"strings"
 	"sync"
 	"time"
 )
@@ -28,9 +34,18 @@ type fileCacheEntry struct {
 	Value []byte
 }
 
+type Footerlink struct {
+	ID       models.FooterLinkID
+	IconPath string
+	IconData []byte
+	Name     string
+	Link     string
+}
+
 type Assets struct {
 	templateCache map[string]templateCacheEntry
 	fileCache     map[string]fileCacheEntry
+	footerlinks   []Footerlink
 	lock          sync.RWMutex
 }
 
@@ -38,6 +53,7 @@ func NewAssets() *Assets {
 	return &Assets{
 		templateCache: make(map[string]templateCacheEntry, 128),
 		fileCache:     make(map[string]fileCacheEntry, 128),
+		footerlinks:   make([]Footerlink, 0),
 		lock:          sync.RWMutex{},
 	}
 }
@@ -213,4 +229,50 @@ func (a *Assets) Template(fp string, builder func([]byte) (*template.Template, e
 			return v.Value, nil
 		}
 	}
+}
+
+func (a *Assets) LoadDynamicAssets() {
+
+	regexFooterLink := rext.W(regexp.MustCompile("^FOOTERLINK(_[A-Z0-9]+)?$"))
+
+	envs := os.Environ()
+	langext.Sort(envs)
+
+	for _, env := range envs {
+		idx := strings.Index(env, "=")
+		key := env[:idx]
+		val := env[idx+1:]
+		if regexFooterLink.IsMatch(key) {
+			split := strings.Split(val, ";")
+			if len(split) != 3 {
+				exerr.New(mply.ErrEnviron, "failed to parse environment variable: "+key).Str("key", key).Str("val", val).Fatal()
+			}
+
+			data, err := os.ReadFile(split[0])
+			if err != nil {
+				exerr.Wrap(err, "failed to read icon-file from environment variable: "+key).Str("key", key).Str("val", val).Fatal()
+			}
+
+			a.footerlinks = append(a.footerlinks, Footerlink{
+				ID:       models.NewFooterLinkID(),
+				IconPath: split[0],
+				IconData: data,
+				Name:     split[1],
+				Link:     split[2],
+			})
+		}
+	}
+}
+
+func (a *Assets) GetFooterLink(id models.FooterLinkID) *Footerlink {
+	for _, v := range a.footerlinks {
+		if v.ID == id {
+			return &v
+		}
+	}
+	return nil
+}
+
+func (a *Assets) ListFooterLinks() []Footerlink {
+	return a.footerlinks
 }

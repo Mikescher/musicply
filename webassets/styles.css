@@ -86,7 +86,7 @@
 
 /* ================================================================ MAIN ================================================================ */
 
-html, body { height: 100%; }
+html, body { height: 100%; width: 100vw;/*! overflow: hidden; */}
 
 body {
   display: grid;
@@ -99,7 +99,7 @@ body {
 
 main {
   display: grid;
-  grid-template-columns: 320px 1fr 100px;
+  grid-template-columns: 320px 1fr 300px;
 
   margin: 6px;
   grid-column-gap: 6px;
@@ -125,6 +125,8 @@ button, input[type="submit"], input[type="reset"], .button {
   /* min-height: 23px; */
   
   padding: 0 12px;
+  
+  cursor: pointer;
 }
 
 button:not(:disabled):active, input[type="submit"]:not(:disabled):active, input[type="reset"]:not(:disabled):active, .button:not(:disabled):active {
@@ -132,9 +134,11 @@ button:not(:disabled):active, input[type="submit"]:not(:disabled):active, input[
   text-shadow: 1px 1px var(--text-color);
 }
 
+/*
 button:not(:disabled):hover, input[type="submit"]:not(:disabled):hover, input[type="reset"]:not(:disabled):hover, .button:not(:disabled):hover {
   box-shadow: var(--border-sunken-outer), var(--border-sunken-inner);
 }
+*/
 
 button:focus, input[type="submit"]:focus, input[type="reset"]:focus {
   outline: 1px dotted #000000;
@@ -175,6 +179,8 @@ button:disabled, input[type="submit"]:disabled, input[type="reset"]:disabled, .b
   font-size: 40px;
   font-weight: bold;
   text-align: center;
+  
+  text-shadow: 0px 0px 8px #FFF; 
 }
 
 /* ================================================================ CONTAINER_LEFT > CONTAINER_PLAYLISTS ================================================================ */
@@ -207,7 +213,12 @@ button:disabled, input[type="submit"]:disabled, input[type="reset"]:disabled, .b
 
 .container_playlists .item.children .item {
   margin-left:16px;
-  padding-left:16px
+  padding-left:16px; 
+}
+
+.container_playlists .item.entry {
+  user-select: none;
+  cursor: pointer;
 }
 
 .container_playlists .item.children .item.entry:before {
@@ -265,10 +276,104 @@ button:disabled, input[type="submit"]:disabled, input[type="reset"]:disabled, .b
 
 /* ================================================================ CONTAINER_TRACKS ================================================================ */
 
+.container_tracks {
+  overflow-y: scroll;
+  
+  display: flex;
+  flex-direction: column;
+  
+  gap: 0.5rem;
+}
 
+.container_tracks > .track {
+  
+  border: 2px groove rgb(240, 240, 240);
+  
+  margin: 0;
+  padding: 10px;
+  padding-block-start: 8px;
+  
+  display: grid;
+  grid-template-columns: auto 1fr auto auto auto;
+  grid-template-rows: 1fr;
+  
+  grid-column-gap: 1rem;
+}
+
+.container_tracks > .track > .track_id    { display: none; }
+.container_tracks > .track > .source_id   { display: none; }
+.container_tracks > .track > .playlist_id { display: none; }
+
+.container_tracks > .track > .cover       { grid-column: 1; grid-row: 1/-1; }
+
+.container_tracks > .track > .col-2       { grid-column: 2; grid-row: 1/-1; }
+.container_tracks > .track > .col-3       { grid-column: 3; grid-row: 1/-1; }
+
+.container_tracks > .track  .samplerate  { display: none; }
+.container_tracks > .track  .channels    { display: none; }
+.container_tracks > .track  .ctime       { display: none; }
+.container_tracks > .track  .size        { display: none; }
+
+.container_tracks > .track > .col-2,
+.container_tracks > .track > .col-3 {
+  display: flex;
+  flex-direction: column;
+}
+
+.container_tracks > .track > .btn_play    { grid-column: 4; grid-row: 1/-1; }
+.container_tracks > .track > .btn_equeue  { grid-column: 5; grid-row: 1/-1; }
+
+.container_tracks > .track .col-2 {
+  font-size: 16px;
+}
+
+.container_tracks > .track .col-3 {
+  font-size: 16px;
+  
+  margin-top: 4px;
+  margin-bottom: 4px;
+  
+  text-align: right;
+}
+
+.container_tracks > .track .title {
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  font-size: 20px;
+}
+
+.container_tracks > .track .trackindex {
+  opacity: 0.5;
+}
+
+.container_tracks > .track .bitrate {
+  opacity: 0.5;
+}
+
+.container_tracks > .track .grow { flex-grow: 1; }
+
+.container_tracks > .track > .btn_play > img {
+  height: 96px;
+  width: 96px;
+  filter: invert(8%) sepia(9%) saturate(21%) hue-rotate(30deg) brightness(100%) contrast(88%); /* filter to #222222  ( https://codepen.io/sosuke/pen/Pjoqqp ) */
+}
+
+.container_tracks > .track > .btn_equeue > img {
+  height: 96px;
+  width: 96px;
+  filter: invert(8%) sepia(9%) saturate(21%) hue-rotate(30deg) brightness(100%) contrast(88%); /* filter to #222222  ( https://codepen.io/sosuke/pen/Pjoqqp ) */
+}
+
+.container_tracks > .track > .cover {
+  height: 128px;
+  width: 128px;
+}
 
 /* ================================================================ CONTAINER_QUEUE ================================================================ */
 
+.container_queue {
+  overflow-y: scroll;
+}
 
 
 /* ================================================================ FOOTER ================================================================ */

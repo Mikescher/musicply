@@ -24,3 +24,5 @@ type SourceID string //@csid:type [SRC]
 type PlaylistID string //@csid:type [PLS]
 
 type TrackID string //@csid:type [TRK]
+
+type FooterLinkID string //@csid:type [FLK]

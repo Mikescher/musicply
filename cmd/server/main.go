@@ -19,6 +19,7 @@ func main() {
 	appdb := db.NewDatabase()
 
 	assets := webassets.NewAssets()
+	assets.LoadDynamicAssets()
 
 	app := logic.NewApp(appdb, assets)
 
