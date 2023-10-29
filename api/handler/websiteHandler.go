@@ -5,13 +5,16 @@ import (
 	"context"
 	"github.com/gin-gonic/gin"
 	"gogs.mikescher.com/BlackForestBytes/goext/ginext"
-	"html/template"
+	json "gogs.mikescher.com/BlackForestBytes/goext/gojson"
+	template_html "html/template"
 	mply "mikescher.com/musicply"
 	"mikescher.com/musicply/logic"
 	"mikescher.com/musicply/models"
+	"mikescher.com/musicply/webassets"
 	"net/http"
 	"path/filepath"
 	"strings"
+	template_text "text/template"
 )
 
 type WebsiteHandler struct {
@@ -44,6 +47,7 @@ func (h WebsiteHandler) ServeIndexHTML(pctx ginext.PreContext) ginext.HTTPRespon
 		"CommitHash":  mply.CommitHash,
 		"APILevel":    mply.APILevel,
 		"FooterLinks": h.app.Assets.ListFooterLinks(),
+		"DBChecksum":  h.app.Database.Checksum(),
 	}
 
 	bin := bytes.Buffer{}
@@ -55,6 +59,49 @@ func (h WebsiteHandler) ServeIndexHTML(pctx ginext.PreContext) ginext.HTTPRespon
 	return ginext.Data(http.StatusOK, "text/html", bin.Bytes())
 }
 
+func (h WebsiteHandler) ServeScriptJS(pctx ginext.PreContext) ginext.HTTPResponse {
+	type uri struct {
+		Checksum string `uri:"cs"`
+	}
+
+	var u uri
+	ctx, g, errResp := pctx.URI(&u).Start()
+	if errResp != nil {
+		return *errResp
+	}
+	defer ctx.Cancel()
+
+	csDB := h.app.Database.Checksum() + ".js"
+
+	if csDB != u.Checksum {
+		return ginext.JSON(http.StatusNotFound, gin.H{"error": "AssetNotFound", "cs_db": csDB, "cs_uri": u.Checksum, "msg": "wrong checksum"})
+	}
+
+	templ, err := h.app.Assets.Template("script.js", h.buildScriptJSTemplate)
+	if err != nil {
+		return ginext.Error(err)
+	}
+
+	data := map[string]any{
+		"RemoteIP":    g.RemoteIP(),
+		"BranchName":  mply.BranchName,
+		"CommitTime":  mply.CommitTime,
+		"VCSType":     mply.VCSType,
+		"CommitHash":  mply.CommitHash,
+		"APILevel":    mply.APILevel,
+		"FooterLinks": h.app.Assets.ListFooterLinks(),
+		"DBChecksum":  h.app.Database.Checksum(),
+	}
+
+	bin := bytes.Buffer{}
+	err = templ.Execute(&bin, data)
+	if err != nil {
+		return ginext.Error(err)
+	}
+
+	return ginext.Data(http.StatusOK, "text/javascript", bin.Bytes())
+}
+
 func (h WebsiteHandler) ServeAssets(pctx ginext.PreContext) ginext.HTTPResponse {
 	type uri struct {
 		FP1 *string `uri:"fp1"`
@@ -63,7 +110,6 @@ func (h WebsiteHandler) ServeAssets(pctx ginext.PreContext) ginext.HTTPResponse 
 	}
 
 	var u uri
-
 	ctx, _, errResp := pctx.URI(&u).Start()
 	if errResp != nil {
 		return *errResp
@@ -108,12 +154,12 @@ func (h WebsiteHandler) ServeAssets(pctx ginext.PreContext) ginext.HTTPResponse 
 	return ginext.Data(http.StatusOK, mime, data)
 }
 
-func (h WebsiteHandler) buildIndexHTMLTemplate(content []byte) (*template.Template, error) {
-	t := template.New("index.html")
+func (h WebsiteHandler) buildIndexHTMLTemplate(content []byte) (webassets.ITemplate, error) {
+	t := template_html.New("index.html")
 
-	t.Funcs(template.FuncMap{
-		"listPlaylists": func() []models.Playlist {
-			v, err := h.app.Database.ListPlaylists(context.Background())
+	t.Funcs(template_html.FuncMap{
+		"listPlaylists": func() models.HierarchicalPlaylist {
+			v, err := h.app.ListHierarchicalPlaylists(context.Background())
 			if err != nil {
 				panic(err)
 			}
@@ -132,6 +178,71 @@ func (h WebsiteHandler) buildIndexHTMLTemplate(content []byte) (*template.Templa
 				panic(err)
 			}
 			return v
+		},
+		"safe": func(s string) template_html.HTML { return template_html.HTML(s) },
+		"json": func(obj any) string {
+			v, err := json.Marshal(obj)
+			if err != nil {
+				panic(err)
+			}
+			return string(v)
+		},
+		"json_indent": func(obj any) string {
+			v, err := json.MarshalIndent(obj, "", "  ")
+			if err != nil {
+				panic(err)
+			}
+			return string(v)
+		},
+	})
+
+	_, err := t.Parse(string(content))
+	if err != nil {
+		return nil, err
+	}
+
+	return t, nil
+}
+
+func (h WebsiteHandler) buildScriptJSTemplate(content []byte) (webassets.ITemplate, error) {
+	t := template_text.New("script.js")
+
+	t.Funcs(template_text.FuncMap{
+		"listPlaylists": func() models.HierarchicalPlaylist {
+			v, err := h.app.ListHierarchicalPlaylists(context.Background())
+			if err != nil {
+				panic(err)
+			}
+			return v
+		},
+		"listPlaylistTracks": func(plid models.PlaylistID) []models.Track {
+			v, err := h.app.Database.ListPlaylistTracks(context.Background(), plid)
+			if err != nil {
+				panic(err)
+			}
+			return v
+		},
+		"listAllTracks": func() []models.Track {
+			v, err := h.app.Database.ListTracks(context.Background())
+			if err != nil {
+				panic(err)
+			}
+			return v
+		},
+		"safe": func(s string) template_html.HTML { return template_html.HTML(s) },
+		"json": func(obj any) string {
+			v, err := json.Marshal(obj)
+			if err != nil {
+				panic(err)
+			}
+			return string(v)
+		},
+		"json_indent": func(obj any) string {
+			v, err := json.MarshalIndent(obj, "", "  ")
+			if err != nil {
+				panic(err)
+			}
+			return string(v)
 		},
 	})
 

@@ -4,9 +4,11 @@ import (
 	"context"
 	"github.com/rs/zerolog/log"
 	"gogs.mikescher.com/BlackForestBytes/goext/ginext"
+	"gogs.mikescher.com/BlackForestBytes/goext/langext"
 	"gogs.mikescher.com/BlackForestBytes/goext/syncext"
 	mply "mikescher.com/musicply"
 	"mikescher.com/musicply/db"
+	"mikescher.com/musicply/models"
 	"mikescher.com/musicply/webassets"
 	"net"
 	"os"
@@ -102,4 +104,89 @@ func (app *Application) Run() {
 	}
 
 	app.IsRunning.Set(false)
+}
+
+func (app *Application) ListHierarchicalPlaylists(ctx context.Context) (models.HierarchicalPlaylist, error) {
+
+	playlists, err := app.Database.ListPlaylists(ctx)
+	if err != nil {
+		return models.HierarchicalPlaylist{}, err
+	}
+
+	root := models.HierarchicalPlaylist{Name: "", Children: make([]models.HierarchicalPlaylist, 0)}
+
+	getOrCreate := func(path []string) *models.HierarchicalPlaylist {
+
+		c := &root
+
+		for ppi, pp := range path {
+
+			lastPathPart := ppi == len(path)-1
+
+			found := false
+			for ci := 0; ci < len(c.Children); ci++ {
+
+				if c.Children[ci].Name == pp {
+
+					if lastPathPart {
+						return &c.Children[ci]
+					}
+
+					c = &(c.Children[ci])
+					found = true
+					break
+				}
+
+			}
+			if !found {
+				c.Children = append(c.Children, models.HierarchicalPlaylist{
+					ID:         nil,
+					Name:       pp,
+					Children:   make([]models.HierarchicalPlaylist, 0),
+					Cover:      nil,
+					TrackCount: 0,
+				})
+				if lastPathPart {
+					r := &(c.Children[len(c.Children)-1])
+					return r
+				}
+			}
+		}
+
+		return c
+	}
+
+	for _, plst := range playlists {
+
+		parts := plst.NameParts()
+
+		hp := getOrCreate(parts[:len(parts)-1])
+
+		hplst := models.HierarchicalPlaylist{
+			ID:         langext.Ptr(plst.ID),
+			Name:       parts[len(parts)-1],
+			Children:   nil,
+			Cover:      nil,
+			TrackCount: 0,
+		}
+
+		hp.Children = append(hp.Children, hplst)
+	}
+
+	var process func(hplst *models.HierarchicalPlaylist)
+	process = func(hplst *models.HierarchicalPlaylist) {
+
+		//TODO cover
+
+		//TODO Track Count
+
+		hplst.HasChildren = len(hplst.Children) > 0
+
+		for i := range hplst.Children {
+			process(&hplst.Children[i])
+		}
+	}
+	process(&root)
+
+	return root, nil
 }

@@ -7,6 +7,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/titanous/json5"
 	"github.com/vansante/go-ffprobe"
+	"gogs.mikescher.com/BlackForestBytes/goext/cryptext"
 	"gogs.mikescher.com/BlackForestBytes/goext/dataext"
 	"gogs.mikescher.com/BlackForestBytes/goext/exerr"
 	"gogs.mikescher.com/BlackForestBytes/goext/fsext"
@@ -255,6 +256,8 @@ func (db *Database) refreshSource(src models.Source) error {
 		db.tracks[v.V1.ID] = langext.ArrToMap(v.V2, func(v models.Track) models.TrackID { return v.ID })
 	}
 
+	db.recalcChecksum(false)
+
 	return nil
 }
 
@@ -401,4 +404,26 @@ func (db *Database) getTrackTags(fp string) (models.TrackTags, error) {
 		Comment:     estrptr(md.Comment()),
 		Raw:         langext.Ptr(md.Raw()),
 	}, nil
+}
+
+func (db *Database) recalcChecksum(lock bool) {
+	if lock {
+		db.lock.Lock()
+		defer db.lock.Unlock()
+	}
+
+	plsts := langext.MapValueArr(db.playlists)
+	trcks := make([]models.Track, 0)
+	for _, v1 := range db.tracks {
+		for _, v2 := range v1 {
+			trcks = append(trcks, v2)
+		}
+	}
+
+	langext.SortBy(plsts, func(v models.Playlist) models.PlaylistID { return v.ID })
+	langext.SortBy(trcks, func(v models.Track) models.TrackID { return v.ID })
+
+	str := fmt.Sprintf("%#+v\n%#+v", plsts, trcks)
+
+	db.checksum = strings.ToUpper(cryptext.StrSha256(str))
 }

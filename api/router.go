@@ -61,6 +61,7 @@ func (r *Router) Init(e *ginext.GinWrapper) {
 	{
 		website.GET("/").Handle(r.websiteHandler.ServeIndexHTML)
 		website.GET("/index.html").Handle(r.websiteHandler.ServeIndexHTML)
+		website.GET("/scripts/:cs").Handle(r.websiteHandler.ServeScriptJS)
 		website.GET("/:fp1").Handle(r.websiteHandler.ServeAssets)
 		website.GET("/:fp1/:fp2").Handle(r.websiteHandler.ServeAssets)
 		website.GET("/:fp1/:fp2/:fp3").Handle(r.websiteHandler.ServeAssets)
@@ -71,6 +72,7 @@ func (r *Router) Init(e *ginext.GinWrapper) {
 	// ================ API ================
 
 	api.GET("/playlists").Handle(r.trackHandler.ListPlaylists)
+	api.GET("/playlists/hierarchical").Handle(r.trackHandler.ListHierarchicalPlaylists)
 	api.GET("/playlists/:plid").Handle(r.trackHandler.GetPlaylist)
 	api.GET("/playlists/:plid/tracks").Handle(r.trackHandler.ListPlaylistTracks)
 	api.GET("/playlists/:plid/tracks/:trackid").Handle(r.trackHandler.GetTrack)

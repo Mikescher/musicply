@@ -74,3 +74,21 @@ type TrackTags struct {
 	Comment     *string         `json:"comment"`
 	Raw         *map[string]any `json:"-"`
 }
+
+func CompareTracks(t1 Track, t2 Track) bool {
+
+	if t1.Tags.Artist != nil && t2.Tags.Artist != nil && *t1.Tags.Artist != *t2.Tags.Artist {
+		return *t1.Tags.Artist < *t2.Tags.Artist
+	}
+
+	if t1.Tags.Album != nil && t2.Tags.Album != nil && *t1.Tags.Album != *t2.Tags.Album {
+		return *t1.Tags.Album < *t2.Tags.Album
+	}
+
+	if t1.Tags.TrackIndex != nil && t2.Tags.TrackIndex != nil && t1.Tags.TrackTotal != nil && t2.Tags.TrackTotal != nil && *t1.Tags.TrackTotal == *t2.Tags.TrackTotal && *t1.Tags.TrackIndex != *t2.Tags.TrackIndex {
+		return *t1.Tags.TrackIndex < *t2.Tags.TrackIndex
+	}
+
+	return t1.FileMeta.Filename < t2.FileMeta.Filename
+
+}

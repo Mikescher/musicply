@@ -453,9 +453,12 @@ main {
 }
 
 .container_tracks > .track > .cover {
-  border-radius: 6px;
-  border: 1px solid #888;
+  background: #fff;
+  padding: 2px;
+  box-shadow: var(--boxshadow-inset);
 }
+
+.container_tracks > .track > .cover > img { height: 100%; width: 100%; }
 
 /* ================================================================ CONTAINER_QUEUE ================================================================ */
 
@@ -522,12 +525,15 @@ main {
 }
 
 .queue_item.active .cover {
-  border-radius: 4px;
-  border: 1px solid #888;
-  
   height: 60px;
   width:  60px;
+  
+  background: #fff;
+  padding: 2px;
+  box-shadow: var(--boxshadow-inset);
 }
+
+.queue_item.active .cover > img { height: 100%; width: 100%; }
 
 .queue_item.active .cover  { grid-column: 1; grid-row: 1/-1; }
 .queue_item.active .title  { grid-column: 2; grid-row: 1; }

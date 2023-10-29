@@ -33,6 +33,25 @@ func (h TrackHandler) ListPlaylists(pctx ginext.PreContext) ginext.HTTPResponse 
 	return ginext.JSON(200, response{Playlists: playlists})
 }
 
+func (h TrackHandler) ListHierarchicalPlaylists(pctx ginext.PreContext) ginext.HTTPResponse {
+	type query struct {
+	}
+
+	var q query
+	ctx, _, errResp := pctx.Query(&q).Start()
+	if errResp != nil {
+		return *errResp
+	}
+	defer ctx.Cancel()
+
+	root, err := h.app.ListHierarchicalPlaylists(ctx)
+	if err != nil {
+		return ginext.Error(err)
+	}
+
+	return ginext.JSON(200, root)
+}
+
 func (h TrackHandler) GetPlaylist(pctx ginext.PreContext) ginext.HTTPResponse {
 	type uri struct {
 		PlaylistId models.PlaylistID `uri:"plid"`

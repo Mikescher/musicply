@@ -4,8 +4,10 @@ import (
 	"context"
 	"fmt"
 	"gogs.mikescher.com/BlackForestBytes/goext/exerr"
+	"gogs.mikescher.com/BlackForestBytes/goext/langext"
 	mply "mikescher.com/musicply"
 	"mikescher.com/musicply/models"
+	"sort"
 )
 
 func (db *Database) ListTracks(ctx context.Context) ([]models.Track, error) {
@@ -19,6 +21,8 @@ func (db *Database) ListTracks(ctx context.Context) ([]models.Track, error) {
 			r = append(r, track)
 		}
 	}
+
+	sort.SliceStable(r, func(i1, i2 int) bool { return models.CompareTracks(r[i1], r[i2]) })
 
 	return r, nil
 }
@@ -67,6 +71,8 @@ func (db *Database) ListPlaylistTracks(ctx context.Context, plid models.Playlist
 		r = append(r, track)
 	}
 
+	sort.SliceStable(r, func(i1, i2 int) bool { return models.CompareTracks(r[i1], r[i2]) })
+
 	return r, nil
 }
 
@@ -79,6 +85,8 @@ func (db *Database) ListPlaylists(ctx context.Context) ([]models.Playlist, error
 	for _, e := range db.playlists {
 		r = append(r, e)
 	}
+
+	langext.SortBy(r, func(v models.Playlist) string { return v.Name })
 
 	return r, nil
 }

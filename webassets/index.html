@@ -19,24 +19,43 @@
 
             <div class="left_header">
 
-                <img src="logo.png" alt="logo">
+                <img draggable="false" src="logo.png" alt="logo">
                 <span class="title">MusicPly</span>
 
             </div>
 
             <div class="container_playlists">
 
-                <div class="item level-1 entry normal"><span class="title">Alle</span></div>
+                <div class="item entry normal all active"><span class="title">Alle</span></div>
 
-                <div class="item level-1 entry normal"><span class="title">98' Gen-X</span></div>
-                <div class="item level-1 entry normal"><span class="title">Bloodhound Gang</span></div>
-                <div class="item level-1 entry expand"><span class="title">Die Ärzte</span></div>
-                <div class="item level-1 children">
-                    <div class="item level-2 entry normal"><span class="title">Im Schatten der Ärzte</span></div>
-                    <div class="item level-2 entry normal active"><span class="title">13</span></div>
-                    <div class="item level-2 entry normal"><span class="title">Jazz ist anders</span></div>
+                <div data-bind="template: { name: 'template-playlist-entry', foreach: playlists_root.children }"></div>
+
+                <script type="text/html" id="template-playlist-entry">
+
+                    {{ safe "<!-- ko ifnot: hasChildren -->" }}
+                        <div class="item entry normal"><span class="title" data-bind="text: name"></span></div>
+                    {{ safe "<!-- /ko -->" }}
+
+                    {{ safe "<!-- ko if: hasChildren -->" }}
+                        <div class="item entry expand"><span class="title" data-bind="text: name"></span></div>
+                        <div class="item entry children">
+                            <div data-bind="template: { name: 'template-playlist-entry', foreach: children }"></div>
+                        </div>
+                    {{ safe "<!-- /ko -->" }}
+
+
+                </script>
+
+                <!--
+                <div class="item entry normal"><span class="title">98' Gen-X</span></div>
+                <div class="item entry normal"><span class="title">Bloodhound Gang</span></div>
+                <div class="item entry expand"><span class="title">Die Ärzte</span></div>
+                <div class="item children">
+                    <div class="item entry normal"><span class="title">Im Schatten der Ärzte</span></div>
+                    <div class="item entry normal active"><span class="title">13</span></div>
+                    <div class="item entry normal"><span class="title">Jazz ist anders</span></div>
                 </div>
-
+                -->
             </div>
 
             <div class="left_footer">
@@ -61,7 +80,9 @@
                 <span class="source_id">SRC8NcqsUFVykLNhXEIB9si7</span>
                 <span class="playlist_id">PLSt16Co0FcAqxPxpDrmfVFE</span>
 
-                <img class="cover" alt="cover" src="no_cover.png">
+                <div class="cover">
+                    <img draggable="false" alt="cover" src="no_cover.png">
+                </div>
 
                 <div class="col-2">
                     <span class="title">I Hope You Die</span>
@@ -86,8 +107,8 @@
                     <span class="samplerate">44100</span>
                 </div>
 
-                <button class="btn_play"  ><img src="/icn_play.svg"    alt="play"></button>
-                <button class="btn_equeue"><img src="/icn_enqueue.svg" alt="enqueue"></button>
+                <button class="btn_play"  ><img draggable="false" src="/icn_play.svg"    alt="play"></button>
+                <button class="btn_equeue"><img draggable="false" src="/icn_enqueue.svg" alt="enqueue"></button>
             </div>
 
             <div class="track">
@@ -95,7 +116,7 @@
                 <span class="source_id">SRC8NcqsUFVykLNhXEIB9si7</span>
                 <span class="playlist_id">PLSt16Co0FcAqxPxpDrmfVFE</span>
 
-                <img class="cover" alt="cover" src="no_cover.png">
+                <img draggable="false" class="cover" alt="cover" src="no_cover.png">
 
                 <div class="col-2">
                     <span class="title">I Hope You Die</span>
@@ -121,8 +142,8 @@
                 </div>
 
 
-                <button class="btn_play"  ><img src="/icn_play.svg"    alt="play"></button>
-                <button class="btn_equeue"><img src="/icn_enqueue.svg" alt="enqueue"></button>
+                <button class="btn_play"  ><img draggable="false" src="/icn_play.svg"    alt="play"></button>
+                <button class="btn_equeue"><img draggable="false" src="/icn_enqueue.svg" alt="enqueue"></button>
             </div>
 
             <div class="track">
@@ -130,7 +151,7 @@
                 <span class="source_id">SRC8NcqsUFVykLNhXEIB9si7</span>
                 <span class="playlist_id">PLSt16Co0FcAqxPxpDrmfVFE</span>
 
-                <img class="cover" alt="cover" src="no_cover.png">
+                <img draggable="false" class="cover" alt="cover" src="no_cover.png">
 
                 <div class="col-2">
                     <span class="title">I Hope You Die</span>
@@ -156,8 +177,8 @@
                 </div>
 
 
-                <button class="btn_play"  ><img src="/icn_play.svg"    alt="play"></button>
-                <button class="btn_equeue"><img src="/icn_enqueue.svg" alt="enqueue"></button>
+                <button class="btn_play"  ><img draggable="false" src="/icn_play.svg"    alt="play"></button>
+                <button class="btn_equeue"><img draggable="false" src="/icn_enqueue.svg" alt="enqueue"></button>
             </div>
 
         </div>
@@ -178,7 +199,9 @@
 
                 <div class="queue_item active">
 
-                    <img class="cover" alt="cover" src="no_cover.png">
+                    <div class="cover">
+                        <img draggable="false" alt="cover" src="no_cover.png">
+                    </div>
 
                     <span class="title">I Hope You Die</span>
                     <span class="album">Hooray For Boobies</span>
@@ -196,9 +219,9 @@
             </div>
 
             <div class="queue_footer">
-                <button class="btn btn_clear"    ><img src="/icn_clear.svg"  alt="play"><span>Clear</span></button>
+                <button class="btn btn_clear"    ><img draggable="false" src="/icn_clear.svg"  alt="play"><span>Clear</span></button>
                 <div class="grow"></div>
-                <button class="btn btn_playpause"><img src="/icn_pause.svg"  alt="pause"></button>
+                <button class="btn btn_playpause"><img draggable="false" src="/icn_pause.svg"  alt="pause"></button>
             </div>
 
         </div>
@@ -209,11 +232,12 @@
         <span class="footer-cell branch_name">{{ .BranchName }}</span>
         <span class="footer-cell commit_time">{{ .CommitTime }}</span>
         <span class="footer-cell commit_hash">{{ .CommitHash }}</span>
+        <span class="footer-cell commit_hash">{{ .DBChecksum }}</span>
         <span class="footer-cell grow"></span>
         <span class="footer-cell name">MusicPly</span>
     </footer>
 
+    <script type="text/javascript" src="/scripts/{{ .DBChecksum }}.js"></script>
 
 </body>
-
 </html>

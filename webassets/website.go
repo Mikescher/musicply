@@ -8,7 +8,7 @@ import (
 	"gogs.mikescher.com/BlackForestBytes/goext/exerr"
 	"gogs.mikescher.com/BlackForestBytes/goext/langext"
 	"gogs.mikescher.com/BlackForestBytes/goext/rext"
-	"html/template"
+	"io"
 	mply "mikescher.com/musicply"
 	"mikescher.com/musicply/models"
 	"os"
@@ -26,7 +26,7 @@ var _assets embed.FS
 
 type templateCacheEntry struct {
 	MDate time.Time
-	Value *template.Template
+	Value ITemplate
 }
 
 type fileCacheEntry struct {
@@ -56,6 +56,10 @@ func NewAssets() *Assets {
 		footerlinks:   make([]Footerlink, 0),
 		lock:          sync.RWMutex{},
 	}
+}
+
+type ITemplate interface {
+	Execute(wr io.Writer, data any) error
 }
 
 func (a *Assets) ListAssets() []string {
@@ -144,7 +148,7 @@ func (a *Assets) Read(fp string) ([]byte, error) {
 	}
 }
 
-func (a *Assets) Template(fp string, builder func([]byte) (*template.Template, error)) (*template.Template, error) {
+func (a *Assets) Template(fp string, builder func([]byte) (ITemplate, error)) (ITemplate, error) {
 	if mply.Conf.LiveReload == nil {
 
 		// no live-reload: use embedded data, and permanently cache template
