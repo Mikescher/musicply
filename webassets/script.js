@@ -123,6 +123,8 @@ vm['tracksInitial'] = ko.observable(true);
 
 vm['tracks'] = ko.observableArray();
 
+vm['queue'] = ko.observableArray();
+
 vm['apiLevel'] = API_LEVEL;
 
 vm['onSearchKeyPress'] = function (data, event) {
@@ -155,6 +157,17 @@ vm['onPlayAll'] = function () {
 
 vm['onShuffle'] = function () {
     //TODO
+};
+
+vm['onPlaySingle'] = function () {
+    //TODO
+};
+
+vm['onEnqueueSingle'] = function (track) {
+    vm.queue.push({
+        type: ko.observable('future'),
+        track: track,
+    });
 };
 
 vm['searchText'] = ko.observable();

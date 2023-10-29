@@ -561,6 +561,7 @@ main {
   background: silver;
   box-shadow: inset -1px -1px #0a0a0a,inset 1px 1px #dfdfdf,inset -2px -2px grey,inset 2px 2px #fff;
   
+  margin: 0rem 1rem;
   padding: 8px;
 }
 
@@ -641,8 +642,8 @@ main {
   flex-direction: column;
 }
 
-.container_tracks > .track > .btn_play    { grid-column: 4; grid-row: 1/-1; }
-.container_tracks > .track > .btn_equeue  { grid-column: 5; grid-row: 1/-1; }
+.container_tracks > .track > .btn_play     { grid-column: 4; grid-row: 1/-1; }
+.container_tracks > .track > .btn_enqueue  { grid-column: 5; grid-row: 1/-1; }
 
 .container_tracks > .track .col-2 {
   font-size: 14px;
@@ -677,14 +678,14 @@ main {
 .container_tracks > .track .grow { flex-grow: 1; }
 
 .container_tracks > .track > .btn_play > img,
-.container_tracks > .track > .btn_equeue > img {
+.container_tracks > .track > .btn_enqueue > img {
   height: 60px;
   width:  60px;
   filter:  var(--filter-col-222222);
 }
 
 .container_tracks > .track > .btn_play,
-.container_tracks > .track > .btn_equeue {
+.container_tracks > .track > .btn_enqueue {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -693,7 +694,7 @@ main {
 
 .container_tracks > .track > .cover,
 .container_tracks > .track > .btn_play,
-.container_tracks > .track > .btn_equeue {
+.container_tracks > .track > .btn_enqueue {
   height: 85px;
   width:  85px;
 }
@@ -707,7 +708,8 @@ main {
 .container_tracks > .track > .cover > img { height: 100%; width: 100%; }
 
 .container_tracks.loading,
-.container_tracks.initial {
+.container_tracks.initial,
+.container_tracks.empty {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -724,6 +726,12 @@ main {
   width:  196px;
   height: 196px;
   filter: grayscale(1) brightness(1.5) opacity(0.3);
+}
+
+.container_tracks .logoEmpty {
+  width:  128px;
+  height: 128px;
+  filter: opacity(0.15);
 }
 
 /* ================================================================ CONTAINER_QUEUE ================================================================ */
@@ -749,6 +757,20 @@ main {
   display: flex;
   flex-direction: column;
   gap: 4px;
+}
+
+.queue.empty {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.queue .logoEmpty {
+  margin-top: 76px;
+  
+  width:  128px;
+  height: 128px;
+  filter: opacity(0.15);
 }
 
 .container_queue > .queue > .queue_item {

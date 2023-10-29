@@ -71,7 +71,7 @@
 
             </div>
 
-            <div class="container_tracks" data-bind="css: { loading: tracksLoading, empty: (!tracksLoading && tracks.length === 0), initial: tracksInitial }">
+            <div class="container_tracks" data-bind="css: { loading: tracksLoading, empty: (!tracksLoading() && tracks().length === 0), initial: tracksInitial }">
 
                 {{ safe "<!-- ko if: tracksLoading -->" }}
                     <div data-bind="if: tracksLoading" class="window loading-dlg" style="width: 320px">
@@ -139,9 +139,13 @@
                             <span data-bind="text: (audioMeta.samplerate)" class="samplerate"></span>
                         </div>
 
-                        <button class="btn_play"  ><img draggable="false" src="/icn_play.svg"    alt="play"></button>
-                        <button class="btn_equeue"><img draggable="false" src="/icn_enqueue.svg" alt="enqueue"></button>
+                        <button class="btn_play"    data-bind="click: $root.onPlaySingle"    ><img draggable="false" src="/icn_play.svg"    alt="play"></button>
+                        <button class="btn_enqueue" data-bind="click: $root.onEnqueueSingle" ><img draggable="false" src="/icn_enqueue.svg" alt="enqueue"></button>
                     </div>
+                {{ safe "<!-- /ko -->" }}
+
+                {{ safe "<!-- ko if: ( !tracksLoading() && !tracksInitial() && tracks().length === 0 ) -->" }}
+                    <img class="logoEmpty" draggable="false" src="/icn_empty.svg" alt="empty">
                 {{ safe "<!-- /ko -->" }}
 
 
@@ -151,36 +155,44 @@
 
         <div class="container_queue">
 
-            <div class="queue">
+            <div class="queue" data-bind="css: { empty: ( queue().length === 0 ) }">
 
-                <div class="queue_item past">
-                    <span class="title">Mama's Boy</span>
-                    <span class="length">3:39</span>
-                </div>
+                {{ safe "<!-- ko if: ( queue().length === 0 ) -->" }}
+                <img class="logoEmpty" draggable="false" src="/icn_empty.svg" alt="empty">
+                {{ safe "<!-- /ko -->" }}
 
-                <div class="queue_item past">
-                    <span class="title">The Inevitable Return Of The Great White Dope</span>
-                    <span class="length">3:39</span>
-                </div>
+                {{ safe "<!-- ko foreach: queue -->" }}
 
-                <div class="queue_item active">
+                    {{ safe "<!-- ko if: type() === 'past' -->" }}
+                        <div class="queue_item past">
+                            <span class="title">Mama's Boy</span>
+                            <span class="length">3:39</span>
+                        </div>
+                    {{ safe "<!-- /ko -->" }}
 
-                    <div class="cover">
-                        <img draggable="false" alt="cover" src="no_cover.png">
-                    </div>
+                    {{ safe "<!-- ko if: type() === 'active' -->" }}
+                        <div class="queue_item active">
+                            <div class="cover">
+                                <img draggable="false" alt="cover" src="no_cover.png">
+                            </div>
 
-                    <span class="title">I Hope You Die</span>
-                    <span class="album">Hooray For Boobies</span>
-                    <span class="artist">Bloodhound Gang</span>
+                            <span class="title">I Hope You Die</span>
+                            <span class="album">Hooray For Boobies</span>
+                            <span class="artist">Bloodhound Gang</span>
 
-                    <input class="range" type="range" min="1" max="11" value="5">
-                    <span class="length">3:39</span>
-                </div>
+                            <input class="range" type="range" min="1" max="11" value="5">
+                            <span class="length">3:39</span>
+                        </div>
+                    {{ safe "<!-- /ko -->" }}
 
-                <div class="queue_item future">
-                    <span class="title">Three Point One Four</span>
-                    <span class="length">3:39</span>
-                </div>
+                    {{ safe "<!-- ko if: type() === 'future' -->" }}
+                        <div class="queue_item future">
+                            <span class="title">Three Point One Four</span>
+                            <span class="length">3:39</span>
+                        </div>
+                    {{ safe "<!-- /ko -->" }}
+
+                {{ safe "<!-- /ko -->" }}
 
             </div>
 
