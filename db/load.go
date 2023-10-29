@@ -425,5 +425,5 @@ func (db *Database) recalcChecksum(lock bool) {
 
 	str := fmt.Sprintf("%#+v\n%#+v", plsts, trcks)
 
-	db.checksum = strings.ToUpper(cryptext.StrSha256(str))
+	db.checksum = strings.ToUpper(cryptext.StrSha256(str))[:16]
 }

@@ -180,8 +180,6 @@ func (app *Application) ListHierarchicalPlaylists(ctx context.Context) (models.H
 
 		//TODO Track Count
 
-		hplst.HasChildren = len(hplst.Children) > 0
-
 		for i := range hplst.Children {
 			process(&hplst.Children[i])
 		}

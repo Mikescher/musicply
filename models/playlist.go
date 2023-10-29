@@ -17,10 +17,9 @@ func (p Playlist) NameParts() []string {
 }
 
 type HierarchicalPlaylist struct {
-	ID          *PlaylistID            `json:"id"`
-	Name        string                 `json:"name"`
-	Children    []HierarchicalPlaylist `json:"children"`
-	HasChildren bool                   `json:"hasChildren"`
+	ID       *PlaylistID            `json:"id"`
+	Name     string                 `json:"name"`
+	Children []HierarchicalPlaylist `json:"children"`
 
 	TrackCount int `json:"trackCount"`
 	Cover      *struct {
