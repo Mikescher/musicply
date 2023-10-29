@@ -36,6 +36,37 @@ func (t Track) Mimetype() string {
 	return "application/octet-stream"
 }
 
+func (t Track) IsFilterMatch(v string) bool {
+	for _, v := range strings.Split(v, " ") {
+
+		v = strings.ToLower(v)
+
+		if t.Tags.Title != nil && strings.Contains(strings.ToLower(*t.Tags.Title), v) {
+			return true
+		}
+
+		if t.Tags.Album != nil && strings.Contains(strings.ToLower(*t.Tags.Album), v) {
+			return true
+		}
+
+		if t.Tags.Artist != nil && strings.Contains(strings.ToLower(*t.Tags.Artist), v) {
+			return true
+		}
+
+		if t.Tags.AlbumArtist != nil && strings.Contains(strings.ToLower(*t.Tags.AlbumArtist), v) {
+			return true
+		}
+
+		if strings.Contains(strings.ToLower(t.FileMeta.Filename), v) {
+			return true
+		}
+
+		return false
+	}
+
+	return true
+}
+
 type TrackFileMeta struct {
 	Filename  string                   `json:"filename"`
 	Extension string                   `json:"extension"`

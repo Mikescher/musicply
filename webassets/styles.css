@@ -86,7 +86,6 @@
   font-style: normal;
 }
 
-
 /* ================================================================ BUTTON ================================================================ */
 
 button, input[type="submit"], input[type="reset"], .button {
@@ -128,6 +127,51 @@ button::-moz-focus-inner, input[type="submit"]::-moz-focus-inner, input[type="re
 
 button:disabled, input[type="submit"]:disabled, input[type="reset"]:disabled, .button:disabled {
   text-shadow: 1px 1px 0 var(--button-highlight);
+}
+
+/* ================================================================ INPUT ================================================================ */
+
+input[type=email],
+input[type=number],
+input[type=password],
+input[type=text],
+select {
+  
+  -webkit-appearance:none;
+  -moz-appearance:none;
+  appearance:none;
+  border:none;
+  border-radius:0;
+    
+  background-color:#fff;
+  box-shadow:inset -1px -1px #fff,inset 1px 1px grey,inset -2px -2px #dfdfdf,inset 2px 2px #0a0a0a;
+  box-sizing:border-box;
+  padding:3px 4px;
+  
+  height:21px;
+  
+  line-height:2;
+}
+
+input[type=email]:disabled,
+input[type=email]:read-only,
+input[type=number]:disabled,
+input[type=number]:read-only,
+input[type=password]:disabled,
+input[type=password]:read-only,
+input[type=text]:disabled,
+input[type=text]:read-only,
+textarea:disabled {
+  background-color:silver
+}
+
+input[type=email]:focus,
+input[type=number]:focus,
+input[type=password]:focus,
+input[type=text]:focus,
+select:focus,
+textarea:focus {
+  outline:none
 }
 
 /* ================================================================ SLIDER ================================================================ */
@@ -507,7 +551,48 @@ main {
   width:  32px;
 }
 
-/* ================================================================ CONTAINER_TRACKS ================================================================ */
+/* ================================================================ CONTAINER_CENTER > CONTAINER_TRACKS ================================================================ */
+
+.searchcontainer {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  grid-column-gap: 4px;
+  
+  background: silver;
+  box-shadow: inset -1px -1px #0a0a0a,inset 1px 1px #dfdfdf,inset -2px -2px grey,inset 2px 2px #fff;
+  
+  padding: 8px;
+}
+
+.searchcontainer button {
+  width: 21px;
+  
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  
+  padding: 4px;
+}
+
+.searchcontainer button img {
+  height:12px;
+}
+
+.searchcontainer .btn_search {
+  margin-right: 2rem;
+}
+
+/* ================================================================ CONTAINER_CENTER > CONTAINER_TRACKS ================================================================ */
+
+.container_center {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  grid-row-gap: 0.5rem;
+
+  height:     100%;
+  max-height: 100%;
+  min-height: 100%;
+}
 
 .container_tracks {
   overflow-y: scroll;

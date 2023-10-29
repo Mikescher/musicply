@@ -2,6 +2,7 @@ package handler
 
 import (
 	"gogs.mikescher.com/BlackForestBytes/goext/ginext"
+	"gogs.mikescher.com/BlackForestBytes/goext/langext"
 	"mikescher.com/musicply/api/responses"
 	"mikescher.com/musicply/logic"
 	"mikescher.com/musicply/models"
@@ -77,6 +78,7 @@ func (h TrackHandler) ListPlaylistTracks(pctx ginext.PreContext) ginext.HTTPResp
 		PlaylistId models.PlaylistID `uri:"plid"`
 	}
 	type query struct {
+		Search *string `form:"search"`
 	}
 	type response struct {
 		Tracks []models.Track `json:"tracks"`
@@ -93,6 +95,10 @@ func (h TrackHandler) ListPlaylistTracks(pctx ginext.PreContext) ginext.HTTPResp
 	tracks, err := h.app.Database.ListPlaylistTracks(ctx, u.PlaylistId)
 	if err != nil {
 		return ginext.Error(err)
+	}
+
+	if q.Search != nil {
+		tracks = langext.ArrFilter(tracks, func(v models.Track) bool { return v.IsFilterMatch(*q.Search) })
 	}
 
 	return ginext.JSON(200, response{Tracks: tracks})
@@ -121,7 +127,7 @@ func (h TrackHandler) StreamTrack(pctx ginext.PreContext) ginext.HTTPResponse {
 
 func (h TrackHandler) ListTracks(pctx ginext.PreContext) ginext.HTTPResponse {
 	type query struct {
-		Search string `form:"search"` //TODO
+		Search *string `form:"search"`
 	}
 	type response struct {
 		Tracks []models.Track `json:"tracks"`
@@ -137,6 +143,10 @@ func (h TrackHandler) ListTracks(pctx ginext.PreContext) ginext.HTTPResponse {
 	tracks, err := h.app.Database.ListTracks(ctx)
 	if err != nil {
 		return ginext.Error(err)
+	}
+
+	if q.Search != nil {
+		tracks = langext.ArrFilter(tracks, func(v models.Track) bool { return v.IsFilterMatch(*q.Search) })
 	}
 
 	return ginext.JSON(200, response{Tracks: tracks})

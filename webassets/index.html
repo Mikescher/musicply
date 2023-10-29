@@ -59,79 +59,93 @@
 
         </div>
 
-        <div class="container_tracks" data-bind="css: { loading: tracksLoading, empty: (!tracksLoading && tracks.length === 0), initial: tracksInitial }">
+        <div class="container_center">
 
-            {{ safe "<!-- ko if: tracksLoading -->" }}
-                <div data-bind="if: tracksLoading" class="window loading-dlg" style="width: 320px">
-                    <div class="title-bar">
-                        <div class="title-bar-text">Loading...</div>
+            <div class="searchcontainer">
+
+                <input class="searchinput" data-bind="value: searchText, valueUpdate: 'input', event: { keypress: onSearchKeyPress }" type="text">
+
+                <button class="btn_search"  data-bind="click: onSearch" ><img draggable="false" src="/icn_search.svg"  alt="search"  ></button>
+                <button class="btn_playall" data-bind="click: onPlayAll"><img draggable="false" src="/icn_play.svg"    alt="play all"></button>
+                <button class="btn_shuffle" data-bind="click: onShuffle"><img draggable="false" src="/icn_shuffle.svg" alt="shuffle" ></button>
+
+            </div>
+
+            <div class="container_tracks" data-bind="css: { loading: tracksLoading, empty: (!tracksLoading && tracks.length === 0), initial: tracksInitial }">
+
+                {{ safe "<!-- ko if: tracksLoading -->" }}
+                    <div data-bind="if: tracksLoading" class="window loading-dlg" style="width: 320px">
+                        <div class="title-bar">
+                            <div class="title-bar-text">Loading...</div>
+                        </div>
+                        <div class="window-body">
+                            <div class="lds-spinner"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+                        </div>
                     </div>
-                    <div class="window-body">
-                        <div class="lds-spinner"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
-                    </div>
-                </div>
-            {{ safe "<!-- /ko -->" }}
+                {{ safe "<!-- /ko -->" }}
 
-            {{ safe "<!-- ko if: tracksInitial -->" }}
-                <img class="logoInitial" draggable="false" src="logo.png" alt="logo">
-            {{ safe "<!-- /ko -->" }}
+                {{ safe "<!-- ko if: tracksInitial -->" }}
+                    <img class="logoInitial" draggable="false" src="logo.png" alt="logo">
+                {{ safe "<!-- /ko -->" }}
 
-            {{ safe "<!-- ko foreach: tracks -->" }}
-                <div class="track">
-                    <span data-bind="text: id" class="track_id"></span>
-                    <span data-bind="text: sourceID" class="source_id"></span>
-                    <span data-bind="text: playlistID" class="playlist_id"></span>
+                {{ safe "<!-- ko foreach: tracks -->" }}
+                    <div class="track">
+                        <span data-bind="text: id" class="track_id"></span>
+                        <span data-bind="text: sourceID" class="source_id"></span>
+                        <span data-bind="text: playlistID" class="playlist_id"></span>
 
-                    <div class="cover">
-                        <img draggable="false" alt="cover" data-bind="attr: { src: ('/api/v' + $root.apiLevel + '/playlists/' + playlistID + '/tracks/' + id + '/cover') }">
-                    </div>
+                        <div class="cover">
+                            <img draggable="false" alt="cover" data-bind="attr: { src: ('/api/v' + $root.apiLevel + '/playlists/' + playlistID + '/tracks/' + id + '/cover') }">
+                        </div>
 
-                    <div class="col-2">
-                        <span data-bind="text: (tags.title ?? '')" class="title"></span>
-                        <span class="album">
-                            <span data-bind="text: (tags.album ?? '')"></span>
-                            <span class="trackindex" data-bind="if: (tags.trackIndex !== null)">
-                                <span>[ </span>
-                                <span data-bind="text: (tags.trackIndex ?? '')"></span>
-                                {{ safe "<!-- ko if: (tags.trackTotal !== null && tags.trackTotal !== 0) -->" }}
-                                    <span> / </span>
-                                    <span data-bind="text: (tags.trackTotal ?? '')"></span>
-                                {{ safe "<!-- /ko -->" }}
-                                <span> ]</span>
+                        <div class="col-2">
+                            <span data-bind="text: (tags.title ?? '')" class="title"></span>
+                            <span class="album">
+                                <span data-bind="text: (tags.album ?? '')"></span>
+                                <span class="trackindex" data-bind="if: (tags.trackIndex !== null)">
+                                    <span>[ </span>
+                                    <span data-bind="text: (tags.trackIndex ?? '')"></span>
+                                    {{ safe "<!-- ko if: (tags.trackTotal !== null && tags.trackTotal !== 0) -->" }}
+                                        <span> / </span>
+                                        <span data-bind="text: (tags.trackTotal ?? '')"></span>
+                                    {{ safe "<!-- /ko -->" }}
+                                    <span> ]</span>
+                                </span>
                             </span>
-                        </span>
-                        <span data-bind="text: (tags.artist ?? '')" class="artist">Bloodhound Gang</span>
+                            <span data-bind="text: (tags.artist ?? '')" class="artist">Bloodhound Gang</span>
+                        </div>
+
+                        <div class="col-3">
+                            <span data-bind="text: (tags.year ?? '')" class="year"></span>
+                            <span data-bind="text: (tags.genre ?? '')" class="genre"></span>
+
+                            <span class="codec">
+                                <span data-bind="text: (audioMeta.codecShort ?? '')"></span>
+                                {{ safe "<!-- ko if: (audioMeta.bitRate !== null) -->" }}
+                                    &nbsp;
+                                    <span data-bind="text: formatBitrate(audioMeta.bitRate)" class="bitrate"></span>
+                                {{ safe "<!-- /ko -->" }}
+                            </span>
+
+                            <span class="grow"></span>
+
+                            <span data-bind="text: formatDuration(audioMeta.duration)" class="length"></span>
+
+                            <span data-bind="text: (audioMeta.channels)" class="channels"></span>
+
+                            <span data-bind="text: (fileMeta.ctime)" class="ctime"></span>
+                            <span data-bind="text: (fileMeta.size + ' MB')" class="size"></span>
+
+                            <span data-bind="text: (audioMeta.samplerate)" class="samplerate"></span>
+                        </div>
+
+                        <button class="btn_play"  ><img draggable="false" src="/icn_play.svg"    alt="play"></button>
+                        <button class="btn_equeue"><img draggable="false" src="/icn_enqueue.svg" alt="enqueue"></button>
                     </div>
+                {{ safe "<!-- /ko -->" }}
 
-                    <div class="col-3">
-                        <span data-bind="text: (tags.year ?? '')" class="year"></span>
-                        <span data-bind="text: (tags.genre ?? '')" class="genre"></span>
 
-                        <span class="codec">
-                            <span data-bind="text: (audioMeta.codecShort ?? '')"></span>
-                            {{ safe "<!-- ko if: (audioMeta.bitRate !== null) -->" }}
-                                &nbsp;
-                                <span data-bind="text: formatBitrate(audioMeta.bitRate)" class="bitrate"></span>
-                            {{ safe "<!-- /ko -->" }}
-                        </span>
-
-                        <span class="grow"></span>
-
-                        <span data-bind="text: formatDuration(audioMeta.duration)" class="length"></span>
-
-                        <span data-bind="text: (audioMeta.channels)" class="channels"></span>
-
-                        <span data-bind="text: (fileMeta.ctime)" class="ctime"></span>
-                        <span data-bind="text: (fileMeta.size + ' MB')" class="size"></span>
-
-                        <span data-bind="text: (audioMeta.samplerate)" class="samplerate"></span>
-                    </div>
-
-                    <button class="btn_play"  ><img draggable="false" src="/icn_play.svg"    alt="play"></button>
-                    <button class="btn_equeue"><img draggable="false" src="/icn_enqueue.svg" alt="enqueue"></button>
-                </div>
-            {{ safe "<!-- /ko -->" }}
-
+            </div>
 
         </div>
 
@@ -192,4 +206,5 @@
     <script type="text/javascript" src="/scripts/{{ .DBChecksum }}.js"></script>
 
 </body>
+
 </html>
