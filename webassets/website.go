@@ -280,3 +280,11 @@ func (a *Assets) GetFooterLink(id models.FooterLinkID) *Footerlink {
 func (a *Assets) ListFooterLinks() []Footerlink {
 	return a.footerlinks
 }
+
+func (a *Assets) NoCover() []byte {
+	bin, err := _assets.ReadFile("no_cover.png")
+	if err != nil {
+		panic(err)
+	}
+	return bin
+}

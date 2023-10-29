@@ -19,6 +19,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 	"syscall"
@@ -188,6 +189,16 @@ func (db *Database) refreshSource(src models.Source) error {
 		}
 	}
 
+	potentialCovers := langext.ArrFilter(files, func(v dataext.Tuple[string, fs.FileInfo]) bool {
+		return langext.InArray(filepath.Base(strings.ToLower(v.V1)), []string{
+			"cover.png", "cover.jpeg", "cover.jpg", "cover.bmp", "cover.gif", "cover.webm",
+			"folder.png", "folder.jpeg", "folder.jpg", "folder.bmp", "folder.gif", "folder.webm",
+			"albumart.png", "albumart.jpeg", "albumart.jpg", "albumart.bmp", "albumart.gif", "albumart.webm",
+			"albumartsmall.png", "albumartsmall.jpeg", "albumartsmall.jpg", "albumartsmall.bmp", "albumartsmall.gif", "albumartsmall.webm",
+			"front.png", "front.jpeg", "front.jpg", "front.bmp", "front.gif", "front.webm",
+		})
+	})
+
 	files = langext.ArrFilter(files, func(v dataext.Tuple[string, fs.FileInfo]) bool {
 		return langext.InArray(filepath.Ext(strings.ToLower(v.V1)), []string{".mp3", ".flac", ".m4a", ".ogg", ".wav", ".wma"})
 	})
@@ -206,6 +217,24 @@ func (db *Database) refreshSource(src models.Source) error {
 		}
 
 		tracks = append(tracks, track)
+	}
+
+	var fileCover *models.CoverData = nil
+	if len(potentialCovers) > 0 {
+		mime := mply.FilenameToMime(potentialCovers[0].V1, "")
+		if mime != "" {
+			bin, err := os.ReadFile(potentialCovers[0].V1)
+			if err != nil {
+				log.Error().Msg(fmt.Sprintf("Failed to parse load cover file '%s'", potentialCovers[0].V1))
+				exerr.Wrap(err, "").Fatal()
+			}
+			fileCover = &models.CoverData{
+				Filepath: potentialCovers[0].V1,
+				MimeType: mime,
+				Data:     bin,
+			}
+		}
+
 	}
 
 	db.lock.Lock()
@@ -228,9 +257,12 @@ func (db *Database) refreshSource(src models.Source) error {
 		}
 
 		plst := models.Playlist{
-			ID:       plid,
-			SourceID: src.ID,
-			Name:     src.Name,
+			ID:        plid,
+			SourceID:  src.ID,
+			Name:      src.Name,
+			Path:      src.Path,
+			CoverData: fileCover,
+			CoverRef:  nil,
 		}
 
 		pltracks := tracks
@@ -239,6 +271,13 @@ func (db *Database) refreshSource(src models.Source) error {
 				pltracks[i].ID = v
 			}
 			pltracks[i].PlaylistID = plst.ID
+		}
+
+		sort.SliceStable(pltracks, func(i1, i2 int) bool { return models.CompareTracks(pltracks[i1], pltracks[i2]) })
+
+		coverTrack := langext.ArrFirstOrNil(pltracks, func(v models.Track) bool { return v.Tags.Picture != nil })
+		if coverTrack != nil {
+			plst.CoverRef = &models.CoverRef{Playlist: plid, Track: coverTrack.ID}
 		}
 
 		playlists = append(playlists, dataext.Tuple[models.Playlist, []models.Track]{V1: plst, V2: pltracks})

@@ -13,7 +13,6 @@ import (
 	"mikescher.com/musicply/webassets"
 	"net/http"
 	"path/filepath"
-	"strings"
 	template_text "text/template"
 )
 
@@ -132,24 +131,7 @@ func (h WebsiteHandler) ServeAssets(pctx ginext.PreContext) ginext.HTTPResponse 
 		return ginext.JSON(http.StatusNotFound, gin.H{"error": "AssetNotFound", "assetpath": assetpath})
 	}
 
-	mime := "text/plain"
-
-	lowerFN := strings.ToLower(assetpath)
-	if strings.HasSuffix(lowerFN, ".html") || strings.HasSuffix(lowerFN, ".htm") {
-		mime = "text/html"
-	} else if strings.HasSuffix(lowerFN, ".css") {
-		mime = "text/css"
-	} else if strings.HasSuffix(lowerFN, ".js") {
-		mime = "text/javascript"
-	} else if strings.HasSuffix(lowerFN, ".json") {
-		mime = "application/json"
-	} else if strings.HasSuffix(lowerFN, ".jpeg") || strings.HasSuffix(lowerFN, ".jpg") {
-		mime = "image/jpeg"
-	} else if strings.HasSuffix(lowerFN, ".png") {
-		mime = "image/png"
-	} else if strings.HasSuffix(lowerFN, ".svg") {
-		mime = "image/svg+xml"
-	}
+	mime := mply.FilenameToMime(assetpath, "text/plain")
 
 	return ginext.Data(http.StatusOK, mime, data)
 }
@@ -273,18 +255,7 @@ func (h WebsiteHandler) GetFooterLinkIcon(pctx ginext.PreContext) ginext.HTTPRes
 		return ginext.JSON(http.StatusNotFound, gin.H{"error": "AssetNotFound", "id": u.ID})
 	}
 
-	mime := "application/octet-stream"
-
-	lowerFN := strings.ToLower(fl.IconPath)
-	if strings.HasSuffix(lowerFN, ".jpeg") || strings.HasSuffix(lowerFN, ".jpg") {
-		mime = "image/jpeg"
-	} else if strings.HasSuffix(lowerFN, ".png") {
-		mime = "image/png"
-	} else if strings.HasSuffix(lowerFN, ".gif") {
-		mime = "image/gif"
-	} else if strings.HasSuffix(lowerFN, ".svg") {
-		mime = "image/svg+xml"
-	}
+	mime := mply.FilenameToMime(fl.IconPath, "application/octet-stream")
 
 	return ginext.Data(http.StatusOK, mime, fl.IconData)
 }

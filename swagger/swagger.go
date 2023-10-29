@@ -5,6 +5,7 @@ import (
 	_ "embed"
 	"github.com/gin-gonic/gin"
 	"gogs.mikescher.com/BlackForestBytes/goext/ginext"
+	mply "mikescher.com/musicply"
 	"net/http"
 	"strings"
 )
@@ -23,24 +24,7 @@ func getAsset(fn string) ([]byte, string, bool) {
 		return nil, "", false
 	}
 
-	mime := "text/plain"
-
-	lowerFN := strings.ToLower(fn)
-	if strings.HasSuffix(lowerFN, ".html") || strings.HasSuffix(lowerFN, ".htm") {
-		mime = "text/html"
-	} else if strings.HasSuffix(lowerFN, ".css") {
-		mime = "text/css"
-	} else if strings.HasSuffix(lowerFN, ".js") {
-		mime = "text/javascript"
-	} else if strings.HasSuffix(lowerFN, ".json") {
-		mime = "application/json"
-	} else if strings.HasSuffix(lowerFN, ".jpeg") || strings.HasSuffix(lowerFN, ".jpg") {
-		mime = "image/jpeg"
-	} else if strings.HasSuffix(lowerFN, ".png") {
-		mime = "image/png"
-	} else if strings.HasSuffix(lowerFN, ".svg") {
-		mime = "image/svg+xml"
-	}
+	mime := mply.FilenameToMime(fn, "text/plain")
 
 	return data, mime, true
 }

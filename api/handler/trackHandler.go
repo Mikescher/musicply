@@ -181,11 +181,65 @@ func (h TrackHandler) GetTrackCover(pctx ginext.PreContext) ginext.HTTPResponse 
 		return ginext.Error(err)
 	}
 
-	if track.Tags.Picture == nil {
-		return ginext.Status(404)
+	if track.Tags.Picture != nil {
+		return ginext.Data(200, track.Tags.Picture.MIMEType, track.Tags.Picture.Data)
 	}
 
-	return ginext.Data(200, track.Tags.Picture.MIMEType, track.Tags.Picture.Data)
+	plst, err := h.app.Database.GetPlaylist(ctx, u.PlaylistId)
+	if err != nil {
+		return ginext.Error(err)
+	}
+
+	if plst.CoverData != nil {
+		return ginext.Data(200, plst.CoverData.MimeType, plst.CoverData.Data)
+	}
+
+	if plst.CoverRef != nil {
+		reftrack, err := h.app.Database.GetTrack(ctx, plst.CoverRef.Playlist, plst.CoverRef.Track)
+		if err != nil {
+			return ginext.Error(err)
+		}
+		if reftrack.Tags.Picture != nil {
+			return ginext.Data(200, reftrack.Tags.Picture.MIMEType, reftrack.Tags.Picture.Data)
+		}
+	}
+
+	return ginext.Data(404, "image/png", h.app.Assets.NoCover())
+}
+
+func (h TrackHandler) GetPlaylistCover(pctx ginext.PreContext) ginext.HTTPResponse {
+	type uri struct {
+		PlaylistId models.PlaylistID `uri:"plid"`
+	}
+
+	var u uri
+	ctx, _, errResp := pctx.URI(&u).Start()
+	if errResp != nil {
+		return *errResp
+	}
+	defer ctx.Cancel()
+
+	plst, err := h.app.Database.GetPlaylist(ctx, u.PlaylistId)
+	if err != nil {
+		return ginext.Error(err)
+	}
+
+	if plst.CoverData != nil {
+		return ginext.Data(200, plst.CoverData.MimeType, plst.CoverData.Data)
+	}
+
+	if plst.CoverRef != nil {
+		reftrack, err := h.app.Database.GetTrack(ctx, plst.CoverRef.Playlist, plst.CoverRef.Track)
+		if err != nil {
+			return ginext.Error(err)
+		}
+		if reftrack.Tags.Picture != nil {
+			return ginext.Data(200, reftrack.Tags.Picture.MIMEType, reftrack.Tags.Picture.Data)
+		}
+	}
+
+	return ginext.Data(404, "image/png", h.app.Assets.NoCover())
+
 }
 
 func NewTrackHandler(app *logic.Application) TrackHandler {

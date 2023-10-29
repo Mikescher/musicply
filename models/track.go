@@ -76,7 +76,6 @@ type TrackTags struct {
 }
 
 func CompareTracks(t1 Track, t2 Track) bool {
-
 	if t1.Tags.Artist != nil && t2.Tags.Artist != nil && *t1.Tags.Artist != *t2.Tags.Artist {
 		return *t1.Tags.Artist < *t2.Tags.Artist
 	}
@@ -85,10 +84,15 @@ func CompareTracks(t1 Track, t2 Track) bool {
 		return *t1.Tags.Album < *t2.Tags.Album
 	}
 
-	if t1.Tags.TrackIndex != nil && t2.Tags.TrackIndex != nil && t1.Tags.TrackTotal != nil && t2.Tags.TrackTotal != nil && *t1.Tags.TrackTotal == *t2.Tags.TrackTotal && *t1.Tags.TrackIndex != *t2.Tags.TrackIndex {
-		return *t1.Tags.TrackIndex < *t2.Tags.TrackIndex
+	if t1.Tags.TrackIndex != nil && t2.Tags.TrackIndex != nil {
+
+		if t1.Tags.TrackTotal != nil && t2.Tags.TrackTotal != nil && *t1.Tags.TrackTotal == *t2.Tags.TrackTotal && *t1.Tags.TrackIndex != *t2.Tags.TrackIndex {
+			return *t1.Tags.TrackIndex < *t2.Tags.TrackIndex
+		} else if *t1.Tags.TrackIndex != *t2.Tags.TrackIndex && t1.Tags.TrackTotal == nil && t2.Tags.TrackTotal == nil {
+			return *t1.Tags.TrackIndex < *t2.Tags.TrackIndex
+		}
+
 	}
 
 	return t1.FileMeta.Filename < t2.FileMeta.Filename
-
 }

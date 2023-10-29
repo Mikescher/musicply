@@ -143,7 +143,8 @@ func (app *Application) ListHierarchicalPlaylists(ctx context.Context) (models.H
 					ID:         nil,
 					Name:       pp,
 					Children:   make([]models.HierarchicalPlaylist, 0),
-					Cover:      nil,
+					CoverRef:   nil,
+					CoverData:  nil,
 					TrackCount: 0,
 				})
 				if lastPathPart {
@@ -166,25 +167,58 @@ func (app *Application) ListHierarchicalPlaylists(ctx context.Context) (models.H
 			ID:         langext.Ptr(plst.ID),
 			Name:       parts[len(parts)-1],
 			Children:   nil,
-			Cover:      nil,
+			CoverData:  plst.CoverData,
+			CoverRef:   plst.CoverRef,
 			TrackCount: 0,
 		}
 
 		hp.Children = append(hp.Children, hplst)
 	}
 
-	var process func(hplst *models.HierarchicalPlaylist)
-	process = func(hplst *models.HierarchicalPlaylist) {
+	var process func(hplst *models.HierarchicalPlaylist) error
+	process = func(hplst *models.HierarchicalPlaylist) error {
 
-		//TODO cover
+		tc, err := app.recursiveTrackCount(ctx, *hplst)
+		if err != nil {
+			return err
+		}
 
-		//TODO Track Count
+		hplst.TrackCount = tc
 
 		for i := range hplst.Children {
-			process(&hplst.Children[i])
+			err = process(&hplst.Children[i])
+			if err != nil {
+				return err
+			}
 		}
+
+		return nil
 	}
-	process(&root)
+
+	err = process(&root)
+	if err != nil {
+		return models.HierarchicalPlaylist{}, err
+	}
 
 	return root, nil
+}
+
+func (app *Application) recursiveTrackCount(ctx context.Context, plst models.HierarchicalPlaylist) (int, error) {
+	count := 0
+	if plst.ID != nil {
+		c, err := app.Database.CountPlaylistTracks(ctx, *plst.ID)
+		if err != nil {
+			return 0, err
+		}
+		count += c
+	}
+	for _, child := range plst.Children {
+		c, err := app.recursiveTrackCount(ctx, child)
+		if err != nil {
+			return 0, err
+		}
+		count += c
+	}
+
+	return count, nil
 }

@@ -76,6 +76,18 @@ func (db *Database) ListPlaylistTracks(ctx context.Context, plid models.Playlist
 	return r, nil
 }
 
+func (db *Database) CountPlaylistTracks(ctx context.Context, plid models.PlaylistID) (int, error) {
+	db.lock.RLock()
+	defer db.lock.RUnlock()
+
+	pl, ok := db.playlists[plid]
+	if !ok {
+		return 0, exerr.New(mply.ErrEntityNotFound, fmt.Sprintf("playlist '%s' not found", pl)).Build()
+	}
+
+	return len(db.tracks[plid]), nil
+}
+
 func (db *Database) ListPlaylists(ctx context.Context) ([]models.Playlist, error) {
 	db.lock.RLock()
 	defer db.lock.RUnlock()

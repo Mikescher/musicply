@@ -88,7 +88,18 @@
 
                     <div class="col-2">
                         <span data-bind="text: (tags.title ?? '')" class="title"></span>
-                        <span class="album"><span data-bind="text: (tags.album ?? '')"></span><span> </span><span data-bind="if: (tags.trackIndex !== null && tags.trackTotal !== null)" class="trackindex">[ <span data-bind="text: (tags.trackIndex ?? '')"></span> / <span data-bind="text: (tags.trackTotal ?? '')"></span> ]</span></span>
+                        <span class="album">
+                            <span data-bind="text: (tags.album ?? '')"></span>
+                            <span class="trackindex" data-bind="if: (tags.trackIndex !== null)">
+                                <span>[ </span>
+                                <span data-bind="text: (tags.trackIndex ?? '')"></span>
+                                {{ safe "<!-- ko if: (tags.trackTotal !== null && tags.trackTotal !== 0) -->" }}
+                                    <span> / </span>
+                                    <span data-bind="text: (tags.trackTotal ?? '')"></span>
+                                {{ safe "<!-- /ko -->" }}
+                                <span> ]</span>
+                            </span>
+                        </span>
                         <span data-bind="text: (tags.artist ?? '')" class="artist">Bloodhound Gang</span>
                     </div>
 
@@ -100,13 +111,13 @@
                             <span data-bind="text: (audioMeta.codecShort ?? '')"></span>
                             {{ safe "<!-- ko if: (audioMeta.bitRate !== null) -->" }}
                                 &nbsp;
-                                <span data-bind="text: ('@ ' + audioMeta.bitRate + ' kbit')" class="bitrate"></span>
+                                <span data-bind="text: formatBitrate(audioMeta.bitRate)" class="bitrate"></span>
                             {{ safe "<!-- /ko -->" }}
                         </span>
 
                         <span class="grow"></span>
 
-                        <span data-bind="text: (audioMeta.duration)" class="length"></span>
+                        <span data-bind="text: formatDuration(audioMeta.duration)" class="length"></span>
 
                         <span data-bind="text: (audioMeta.channels)" class="channels"></span>
 

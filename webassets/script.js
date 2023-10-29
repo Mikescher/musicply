@@ -8,6 +8,14 @@ function playlist_iterate(obj, fn) {
 
 const sleep = (milliseconds) => {return new Promise(resolve => setTimeout(resolve, milliseconds))}
 
+function formatDuration(v) {
+    return Math.floor(v/60) + ':' + `${Math.floor(v%60)}`.padStart(2, '0');
+}
+
+function formatBitrate(v) {
+    return ('@ ' + Math.round(v/1000) + ' kbit');
+}
+
 //----------------------------------------------------------------------------------------------------------------------
 
 ko.options.deferUpdates = true;
@@ -31,7 +39,7 @@ async function loadTracks(ids) {
                 }
                 return trackarr;
             })(),
-            sleep(600),
+            sleep(300),
         ]))[0];
 
         vm.tracks(tracks);
