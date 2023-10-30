@@ -9,7 +9,7 @@ SWAGGO=github.com/swaggo/swag/cmd/swag@$(SWAGGO_VERSION)
 
 .PHONY: fmt swagger clean run build-docker run-docker-local inspect-docker push-docker lint test
 
-build: enums ids swagger fmt
+build: enums ids swagger fmt lint
 	mkdir -p _build
 	rm -f ./_build/musicply
 	go build -v -buildvcs=false -o _build/bnet_backend ./cmd/server

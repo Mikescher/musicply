@@ -17,6 +17,7 @@ type Router struct {
 	playlistHandler handler.PlaylistHandler
 	coverHandler    handler.CoverHandler
 	websiteHandler  handler.WebsiteHandler
+	databaseHandler handler.DatabaseHandler
 }
 
 func NewRouter(app *logic.Application) *Router {
@@ -28,6 +29,7 @@ func NewRouter(app *logic.Application) *Router {
 		playlistHandler: handler.NewPlaylistHandler(app),
 		coverHandler:    handler.NewCoverHandler(app),
 		websiteHandler:  handler.NewWebsiteHandler(app),
+		databaseHandler: handler.NewDatabaseHandler(app),
 	}
 }
 
@@ -85,6 +87,8 @@ func (r *Router) Init(e *ginext.GinWrapper) {
 	api.GET("/tracks").Handle(r.trackHandler.ListTracks)
 
 	api.GET("/covers/:cvrhash").Handle(r.coverHandler.GetCover)
+
+	api.POST("/refresh").Handle(r.databaseHandler.RefreshSources)
 
 	// ================  ================
 

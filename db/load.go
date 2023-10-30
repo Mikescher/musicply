@@ -147,7 +147,7 @@ func (db *Database) RefreshAllInitial() {
 
 	for _, src := range db.sources {
 
-		err := db.refreshSource(src)
+		err := db.RefreshSource(src)
 		if err != nil {
 			exerr.Wrap(err, "").Fatal()
 		}
@@ -159,7 +159,7 @@ func (db *Database) RefreshAllInitial() {
 
 }
 
-func (db *Database) refreshSource(src models.Source) error {
+func (db *Database) RefreshSource(src models.Source) error {
 
 	files := make([]dataext.Tuple[string, fs.FileInfo], 0)
 

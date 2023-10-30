@@ -115,3 +115,16 @@ func (db *Database) GetCover(ctx *ginext.AppContext, cover models.CoverHash) (mo
 
 	return pl, nil
 }
+
+func (db *Database) ListSources(ctx context.Context) []models.Source {
+	db.lock.RLock()
+	defer db.lock.RUnlock()
+
+	r := make([]models.Source, 0, len(db.sources))
+
+	r = append(r, db.sources...)
+
+	langext.SortBy(r, func(v models.Source) string { return v.Path })
+
+	return r
+}

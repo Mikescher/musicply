@@ -7,6 +7,7 @@ import (
 	mply "mikescher.com/musicply"
 	"mikescher.com/musicply/api"
 	"mikescher.com/musicply/db"
+	"mikescher.com/musicply/jobs"
 	"mikescher.com/musicply/logic"
 	"mikescher.com/musicply/webassets"
 )
@@ -31,7 +32,9 @@ func main() {
 
 	router := api.NewRouter(app)
 
-	appjobs := make([]logic.Job, 0)
+	appjobs := []logic.Job{
+		jobs.NewRefreshSourcesJob(app),
+	}
 
 	app.Init(mply.Conf, ginengine, appjobs)
 
