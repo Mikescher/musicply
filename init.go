@@ -11,6 +11,7 @@ import (
 )
 
 func Init() {
+	//nolint:exhaustruct
 	exerr.Init(exerr.ErrorPackageConfigInit{
 		ZeroLogErrTraces:       langext.PTrue,
 		ZeroLogAllTraces:       langext.PTrue,
@@ -19,6 +20,7 @@ func Init() {
 		IncludeMetaInGinOutput: &Conf.ReturnRawErrors,
 	})
 
+	//nolint:exhaustruct
 	cw := zerolog.ConsoleWriter{
 		Out:        os.Stdout,
 		TimeFormat: "2006-01-02 15:04:05 Z07:00",

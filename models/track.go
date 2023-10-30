@@ -15,6 +15,7 @@ type Track struct {
 	FileMeta   TrackFileMeta  `json:"fileMeta"`
 	AudioMeta  TrackAudioMeta `json:"audioMeta"`
 	Tags       TrackTags      `json:"tags"`
+	Cover      *CoverHash     `json:"cover"`
 }
 
 func (t Track) Mimetype() string {
@@ -42,23 +43,23 @@ func (t Track) IsFilterMatch(v string) bool {
 		v = strings.ToLower(v)
 
 		if t.Tags.Title != nil && strings.Contains(strings.ToLower(*t.Tags.Title), v) {
-			return true
+			continue
 		}
 
 		if t.Tags.Album != nil && strings.Contains(strings.ToLower(*t.Tags.Album), v) {
-			return true
+			continue
 		}
 
 		if t.Tags.Artist != nil && strings.Contains(strings.ToLower(*t.Tags.Artist), v) {
-			return true
+			continue
 		}
 
 		if t.Tags.AlbumArtist != nil && strings.Contains(strings.ToLower(*t.Tags.AlbumArtist), v) {
-			return true
+			continue
 		}
 
 		if strings.Contains(strings.ToLower(t.FileMeta.Filename), v) {
-			return true
+			continue
 		}
 
 		return false

@@ -161,7 +161,7 @@ func (h WebsiteHandler) buildIndexHTMLTemplate(content []byte) (webassets.ITempl
 			}
 			return v
 		},
-		"safe": func(s string) template_html.HTML { return template_html.HTML(s) },
+		"safe": func(s string) template_html.HTML { return template_html.HTML(s) }, //nolint:gosec
 		"json": func(obj any) string {
 			v, err := json.Marshal(obj)
 			if err != nil {
@@ -211,7 +211,7 @@ func (h WebsiteHandler) buildScriptJSTemplate(content []byte) (webassets.ITempla
 			}
 			return v
 		},
-		"safe": func(s string) template_html.HTML { return template_html.HTML(s) },
+		"safe": func(s string) template_html.HTML { return template_html.HTML(s) }, //nolint:gosec
 		"json": func(obj any) string {
 			v, err := json.Marshal(obj)
 			if err != nil {

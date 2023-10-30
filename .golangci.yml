@@ -1,0 +1,46 @@
+# https://golangci-lint.run/usage/configuration/
+
+run:
+  go: '1.19'
+
+linters:
+  disable-all: true
+  enable:
+    - errcheck                  # checking for unchecked errors in Go code
+    - gosimple                  # Linter for Go source code that specializes in simplifying code.
+    - govet                     # Vet examines Go source code and reports suspicious constructs
+    - ineffassign               # Detects when assignments to existing variables are not used.
+    - staticcheck               # It's a set of rules from staticcheck
+    - unused                    # Checks Go code for unused constants, variables, functions and types.
+    - durationcheck             # Check for two durations multiplied together.
+    - errchkjson                # Checks types passed to the json encoding functions
+    - errname                   # Checks that sentinel errors are prefixed with the Err and error types are suffixed with the Error.
+    - errorlint                 # find code that will cause problems with the error wrapping scheme introduced in Go 1.13.
+    - exhaustive                # Check exhaustiveness of enum switch statements.
+    - exhaustruct               # Checks if all structure fields are initialized.
+    - exportloopref             # Checks for pointers to enclosing loop variables.
+    - forcetypeassert           # Finds forced type assertions.
+    - gocheckcompilerdirectives # Checks that go compiler directive comments (//go:) are valid.
+    - gochecksumtype            # Run exhaustiveness checks on Go "sum types".
+    - goerr113                  # Go linter to check the errors handling expressions.
+    - gofmt                     # Gofmt checks whether code was gofmt-ed.
+    - gosec                     # Inspects source code for security problems.
+    - importas                  # Enforces consistent import aliases.
+    - makezero                  # Finds slice declarations with non-zero initial length.
+    - mirror                    # Reports wrong mirror patterns of bytes/strings usage.
+    - misspell                  # Finds commonly misspelled English words in comments.
+    - musttag                   # Enforce field tags in (un)marshaled structs.
+    - nilnil                    # Checks that there is no simultaneous return of nil error and an invalid value.
+    - noctx                     # Noctx finds sending http request without context.Context.
+    - nolintlint                # Reports ill-formed or insufficient nolint directives.
+    - predeclared               # Find code that shadows one of Go's predeclared identifiers.
+    - reassign                  # Checks that package variables are not reassigned.
+    - tagalign                  # Check that struct tags are well aligned.
+    - unconvert                 # Remove unnecessary type conversions.
+    - unparam                   # Reports unused function parameters.
+    - zerologlint               # Detects the wrong usage of zerolog that a user forgets to dispatch with Send or Msg.
+
+linters-settings:
+  tagalign:
+    align: true
+    sort: false

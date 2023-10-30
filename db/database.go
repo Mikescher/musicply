@@ -12,6 +12,7 @@ type Database struct {
 
 	playlists map[models.PlaylistID]models.Playlist
 	tracks    map[models.PlaylistID]map[models.TrackID]models.Track
+	covers    map[models.CoverHash]models.CoverData
 	lock      sync.RWMutex
 }
 
@@ -20,6 +21,8 @@ func NewDatabase() *Database {
 		sources:   make([]models.Source, 0),
 		tracks:    make(map[models.PlaylistID]map[models.TrackID]models.Track),
 		playlists: make(map[models.PlaylistID]models.Playlist),
+		covers:    make(map[models.CoverHash]models.CoverData),
+		checksum:  "0000000000000000",
 		lock:      sync.RWMutex{},
 	}
 }

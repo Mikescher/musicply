@@ -1,17 +1,8 @@
 package models
 
-import "strings"
-
-type CoverData struct {
-	Filepath string `json:"filepath"`
-	MimeType string `json:"mimeType"`
-	Data     []byte `json:"-"`
-}
-
-type CoverRef struct {
-	Playlist PlaylistID `json:"playlistID"`
-	Track    TrackID    `json:"trackID"`
-}
+import (
+	"strings"
+)
 
 type Playlist struct {
 	ID       PlaylistID `json:"id"`
@@ -19,8 +10,7 @@ type Playlist struct {
 	Path     string     `json:"path"`
 	Name     string     `json:"name"`
 
-	CoverData *CoverData `json:"coverData"`
-	CoverRef  *CoverRef  `json:"coverRef"`
+	Cover *CoverHash `json:"cover"`
 }
 
 func (p Playlist) NameParts() []string {
@@ -37,6 +27,5 @@ type HierarchicalPlaylist struct {
 	Children []HierarchicalPlaylist `json:"children"`
 
 	TrackCount int        `json:"trackCount"`
-	CoverData  *CoverData `json:"coverData"`
-	CoverRef   *CoverRef  `json:"coverRef"`
+	Cover      *CoverHash `json:"cover"`
 }

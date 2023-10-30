@@ -35,6 +35,7 @@ func (lstr *JobListener) Log(lvl models.JobLogLevel, logtype string, msg string,
 		Message:        msg,
 		Level:          lvl,
 		Extra:          extra,
+		Deleted:        nil,
 	}
 
 	lstr.logs = append(lstr.logs, logentry)

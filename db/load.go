@@ -203,13 +203,15 @@ func (db *Database) refreshSource(src models.Source) error {
 		return langext.InArray(filepath.Ext(strings.ToLower(v.V1)), []string{".mp3", ".flac", ".m4a", ".ogg", ".wav", ".wma"})
 	})
 
+	covers := make([]models.CoverData, 0)
+
 	tracks := make([]models.Track, 0, len(files))
 	for _, fobj := range files {
 
 		fp := fobj.V1
 		info := fobj.V2
 
-		track, err := db.analyzeAudioFile(src.ID, fp, info)
+		track, coverdata, err := db.analyzeAudioFile(src.ID, fp, info)
 		if err != nil {
 			log.Error().Msg(fmt.Sprintf("Failed to parse track from file '%s'", fp))
 			exerr.Wrap(err, "").Print()
@@ -217,6 +219,9 @@ func (db *Database) refreshSource(src models.Source) error {
 		}
 
 		tracks = append(tracks, track)
+		if coverdata != nil {
+			covers = append(covers, *coverdata)
+		}
 	}
 
 	var fileCover *models.CoverData = nil
@@ -229,10 +234,11 @@ func (db *Database) refreshSource(src models.Source) error {
 				exerr.Wrap(err, "").Fatal()
 			}
 			fileCover = &models.CoverData{
-				Filepath: potentialCovers[0].V1,
+				Hash:     models.CoverHash(cryptext.BytesSha256(bin)),
 				MimeType: mime,
 				Data:     bin,
 			}
+			covers = append(covers, *fileCover)
 		}
 
 	}
@@ -257,12 +263,11 @@ func (db *Database) refreshSource(src models.Source) error {
 		}
 
 		plst := models.Playlist{
-			ID:        plid,
-			SourceID:  src.ID,
-			Name:      src.Name,
-			Path:      src.Path,
-			CoverData: fileCover,
-			CoverRef:  nil,
+			ID:       plid,
+			SourceID: src.ID,
+			Name:     src.Name,
+			Path:     src.Path,
+			Cover:    langext.ConditionalFn01(fileCover == nil, nil, func() *models.CoverHash { return langext.Ptr(fileCover.Hash) }),
 		}
 
 		pltracks := tracks
@@ -275,12 +280,26 @@ func (db *Database) refreshSource(src models.Source) error {
 
 		sort.SliceStable(pltracks, func(i1, i2 int) bool { return models.CompareTracks(pltracks[i1], pltracks[i2]) })
 
-		coverTrack := langext.ArrFirstOrNil(pltracks, func(v models.Track) bool { return v.Tags.Picture != nil })
-		if coverTrack != nil {
-			plst.CoverRef = &models.CoverRef{Playlist: plid, Track: coverTrack.ID}
+		if plst.Cover == nil {
+			coverTrack := langext.ArrFirstOrNil(pltracks, func(v models.Track) bool { return v.Tags.Picture != nil })
+			if coverTrack != nil {
+				plst.Cover = coverTrack.Cover
+			}
+		}
+
+		if plst.Cover != nil {
+			for i := 0; i < len(pltracks); i++ {
+				if pltracks[i].Cover == nil {
+					pltracks[i].Cover = plst.Cover
+				}
+			}
 		}
 
 		playlists = append(playlists, dataext.Tuple[models.Playlist, []models.Track]{V1: plst, V2: pltracks})
+	}
+
+	for _, cvrdata := range covers {
+		db.covers[cvrdata.Hash] = cvrdata
 	}
 
 	for _, v := range langext.ArrFilter(langext.MapValueArr(db.playlists), func(pl models.Playlist) bool { return pl.SourceID == src.ID }) {
@@ -300,34 +319,51 @@ func (db *Database) refreshSource(src models.Source) error {
 	return nil
 }
 
-func (db *Database) analyzeAudioFile(srcid models.SourceID, fp string, info fs.FileInfo) (models.Track, error) {
+func (db *Database) analyzeAudioFile(srcid models.SourceID, fp string, info fs.FileInfo) (models.Track, *models.CoverData, error) {
 
 	fm, err := db.getFileMeta(fp, info)
 	if err != nil {
-		return models.Track{}, exerr.Wrap(err, "").Build()
+		return models.Track{}, nil, exerr.Wrap(err, "").Build()
 	}
 
 	am, err := db.getAudioMeta(fp)
 	if err != nil {
-		return models.Track{}, exerr.Wrap(err, "").Build()
+		return models.Track{}, nil, exerr.Wrap(err, "").Build()
 	}
 
 	tt, err := db.getTrackTags(fp)
 	if err != nil {
-		return models.Track{}, exerr.Wrap(err, "").Build()
+		return models.Track{}, nil, exerr.Wrap(err, "").Build()
+	}
+
+	var cvr *models.CoverData = nil
+	var chash *models.CoverHash = nil
+	if tt.Picture != nil {
+		chash = langext.Ptr(models.CoverHash(cryptext.BytesSha256(tt.Picture.Data)))
+		cvr = &models.CoverData{
+			Hash:     *chash,
+			MimeType: tt.Picture.MIMEType,
+			Data:     tt.Picture.Data,
+		}
 	}
 
 	return models.Track{
-		ID:        models.NewTrackID(),
-		SourceID:  srcid,
-		Path:      fp,
-		FileMeta:  fm,
-		AudioMeta: am,
-		Tags:      tt,
-	}, nil
+		ID:         models.NewTrackID(),
+		SourceID:   srcid,
+		Path:       fp,
+		FileMeta:   fm,
+		AudioMeta:  am,
+		Tags:       tt,
+		Cover:      chash,
+		PlaylistID: "", // will be set later
+	}, cvr, nil
 }
 
 func (db *Database) getFileMeta(fp string, info fs.FileInfo) (models.TrackFileMeta, error) {
+	if info == nil {
+		return models.TrackFileMeta{}, exerr.New(mply.ErrInternal, "no file info").Build()
+	}
+
 	var ctime *time.Time = nil
 	var atime *time.Time = nil
 
@@ -396,7 +432,25 @@ func (db *Database) getTrackTags(fp string) (models.TrackTags, error) {
 
 	md, err := tag.ReadFrom(fptr)
 	if errors.Is(err, tag.ErrNoTagsFound) {
-		return models.TrackTags{}, nil
+		return models.TrackTags{
+			Format:      nil,
+			FileType:    nil,
+			Title:       nil,
+			Album:       nil,
+			Artist:      nil,
+			AlbumArtist: nil,
+			Composer:    nil,
+			Year:        nil,
+			Genre:       nil,
+			TrackIndex:  nil,
+			TrackTotal:  nil,
+			DiscIndex:   nil,
+			DiscTotal:   nil,
+			Picture:     nil,
+			Lyrics:      nil,
+			Comment:     nil,
+			Raw:         nil,
+		}, nil
 	}
 	if err != nil {
 		return models.TrackTags{}, exerr.Wrap(err, "failed to get audiofile tag-data").Build()

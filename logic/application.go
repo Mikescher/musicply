@@ -29,6 +29,7 @@ type Application struct {
 }
 
 func NewApp(db *db.Database, ass *webassets.Assets) *Application {
+	//nolint:exhaustruct
 	return &Application{
 		Database:  db,
 		Assets:    ass,
@@ -84,7 +85,7 @@ func (app *Application) Run() {
 	case err := <-errChan:
 		log.Error().Err(err).Msg("HTTP-Server failed")
 
-	case _ = <-app.stopChan:
+	case <-app.stopChan:
 		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 		defer cancel()
 
@@ -113,7 +114,7 @@ func (app *Application) ListHierarchicalPlaylists(ctx context.Context) (models.H
 		return models.HierarchicalPlaylist{}, err
 	}
 
-	root := models.HierarchicalPlaylist{Name: "", Children: make([]models.HierarchicalPlaylist, 0)}
+	root := models.HierarchicalPlaylist{Name: "", Children: make([]models.HierarchicalPlaylist, 0)} //nolint:exhaustruct
 
 	getOrCreate := func(path []string) *models.HierarchicalPlaylist {
 
@@ -143,12 +144,12 @@ func (app *Application) ListHierarchicalPlaylists(ctx context.Context) (models.H
 					ID:         nil,
 					Name:       pp,
 					Children:   make([]models.HierarchicalPlaylist, 0),
-					CoverRef:   nil,
-					CoverData:  nil,
+					Cover:      nil,
 					TrackCount: 0,
 				})
 				if lastPathPart {
 					r := &(c.Children[len(c.Children)-1])
+
 					return r
 				}
 			}
@@ -167,8 +168,7 @@ func (app *Application) ListHierarchicalPlaylists(ctx context.Context) (models.H
 			ID:         langext.Ptr(plst.ID),
 			Name:       parts[len(parts)-1],
 			Children:   nil,
-			CoverData:  plst.CoverData,
-			CoverRef:   plst.CoverRef,
+			Cover:      plst.Cover,
 			TrackCount: 0,
 		}
 

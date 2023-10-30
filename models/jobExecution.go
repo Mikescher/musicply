@@ -31,6 +31,6 @@ func (u JobExecution) Delta() time.Duration {
 	if u.EndTime != nil {
 		return u.EndTime.Sub(u.StartTime)
 	} else {
-		return time.Now().Sub(u.StartTime.Time())
+		return time.Since(u.StartTime.Time())
 	}
 }

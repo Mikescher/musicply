@@ -53,7 +53,7 @@ func getConfig(ns string) (Config, bool) {
 		}
 		return conf, true
 	}
-	return Config{}, false
+	return Config{}, false //nolint:exhaustruct
 }
 
 func init() {

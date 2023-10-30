@@ -2,6 +2,7 @@ package jobs
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/rs/zerolog/log"
 	"gogs.mikescher.com/BlackForestBytes/goext/exerr"
@@ -79,7 +80,7 @@ func (j *JobRunner[TData]) mainLoop() {
 		interval := j.interval
 		if firstRun {
 			// randomize first interval to spread jobs around
-			perc := mathext.Clamp(rand.Float64(), 0.1, 0.5)
+			perc := mathext.Clamp(rand.Float64(), 0.1, 0.5) //nolint:gosec
 			interval = time.Duration(int64(float64(interval) * perc))
 		}
 		firstRun = false
@@ -128,6 +129,7 @@ func (j *JobRunner[TData]) execute() (err error) {
 		EndTime:        nil,
 		Changes:        0,
 		Status:         models.JobStatusRunning,
+		Error:          nil,
 	}
 
 	lstr := NewJobListener(j.app, jobExec.JobExecutionID, j.name)
@@ -136,8 +138,8 @@ func (j *JobRunner[TData]) execute() (err error) {
 
 	changes, err := langext.RunPanicSafeR2(func() (int, error) { return j.jobFunc(runCtx, j.app, lstr, j.data) })
 
-	//goland:noinspection GoTypeAssertionOnErrors
-	if panicerr, ok := err.(langext.PanicWrappedErr); ok {
+	var panicerr langext.PanicWrappedErr
+	if errors.As(err, &panicerr) {
 
 		jobExec.EndTime = langext.Ptr(rfctime.NowRFC3339Nano())
 		jobExec.Error = langext.Ptr(panicerr.Error())
@@ -145,24 +147,6 @@ func (j *JobRunner[TData]) execute() (err error) {
 		jobExec.Changes = changes
 		lstr.LogFatal("JOB_PANIC", "Job finished with a panic", langext.H{"msg": panicerr.Error(), "obj": panicerr.ReoveredObj()})
 		log.Error().Str("panic", panicerr.Error()).Msg(fmt.Sprintf("Job '%s' <%s> finished with panic and %d changes after %f minutes", j.name, jobExec.JobExecutionID, changes, jobExec.Delta().Minutes()))
-
-	} else if err != nil {
-
-		jobExec.EndTime = langext.Ptr(rfctime.NowRFC3339Nano())
-		jobExec.Error = langext.Ptr(err.Error())
-		jobExec.Status = models.JobStatusFailed
-		jobExec.Changes = changes
-		lstr.LogFatal("JOB_ERR", "Job finished with an error", langext.H{"msg": err.Error(), "err_obj": exerr.FromError(err).ToAPIJson(false, true, true)})
-		log.Error().Str("err", err.Error()).Msg(fmt.Sprintf("Job '%s' <%s> finished with an error and %d changes after %f minutes", j.name, jobExec.JobExecutionID, changes, jobExec.Delta().Minutes()))
-
-	} else {
-
-		jobExec.EndTime = langext.Ptr(rfctime.NowRFC3339Nano())
-		jobExec.Error = nil
-		jobExec.Status = models.JobStatusSuccess
-		jobExec.Changes = changes
-		lstr.LogInfo("JOB_FINISH", "Job finished", nil)
-		log.Info().Msg(fmt.Sprintf("Job '%s' <%s> finished successfully with %d changes after %f minutes", j.name, jobExec.JobExecutionID, changes, jobExec.Delta().Minutes()))
 
 	}
 

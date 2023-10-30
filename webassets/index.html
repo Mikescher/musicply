@@ -95,7 +95,12 @@
                         <span data-bind="text: playlistID" class="playlist_id"></span>
 
                         <div class="cover">
-                            <img draggable="false" alt="cover" data-bind="attr: { src: ('/api/v' + $root.apiLevel + '/playlists/' + playlistID + '/tracks/' + id + '/cover') }">
+                            {{ safe "<!-- ko if: cover !== null -->" }}
+                                <img draggable="false" alt="cover" data-bind="attr: { src: ('/api/v' + $root.apiLevel + '/covers/' + cover) }">
+                            {{ safe "<!-- /ko -->" }}
+                            {{ safe "<!-- ko if: cover === null -->" }}
+                                <img draggable="false" alt="cover" src="/no_cover.png">
+                            {{ safe "<!-- /ko -->" }}
                         </div>
 
                         <div class="col-2">

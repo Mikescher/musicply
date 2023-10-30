@@ -30,5 +30,5 @@ func (j streamResponse) WithHeader(k string, v string) ginext.HTTPResponse {
 }
 
 func Stream(mimetype string, filepath string) ginext.HTTPResponse {
-	return &streamResponse{mimetype: mimetype, filepath: filepath}
+	return &streamResponse{mimetype: mimetype, filepath: filepath, headers: nil}
 }

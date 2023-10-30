@@ -12,18 +12,22 @@ import (
 type Router struct {
 	app *logic.Application
 
-	commonHandler  handler.CommonHandler
-	trackHandler   handler.TrackHandler
-	websiteHandler handler.WebsiteHandler
+	commonHandler   handler.CommonHandler
+	trackHandler    handler.TrackHandler
+	playlistHandler handler.PlaylistHandler
+	coverHandler    handler.CoverHandler
+	websiteHandler  handler.WebsiteHandler
 }
 
 func NewRouter(app *logic.Application) *Router {
 	return &Router{
 		app: app,
 
-		commonHandler:  handler.NewCommonHandler(app),
-		trackHandler:   handler.NewTrackHandler(app),
-		websiteHandler: handler.NewWebsiteHandler(app),
+		commonHandler:   handler.NewCommonHandler(app),
+		trackHandler:    handler.NewTrackHandler(app),
+		playlistHandler: handler.NewPlaylistHandler(app),
+		coverHandler:    handler.NewCoverHandler(app),
+		websiteHandler:  handler.NewWebsiteHandler(app),
 	}
 }
 
@@ -71,16 +75,16 @@ func (r *Router) Init(e *ginext.GinWrapper) {
 
 	// ================ API ================
 
-	api.GET("/playlists").Handle(r.trackHandler.ListPlaylists)
-	api.GET("/playlists/hierarchical").Handle(r.trackHandler.ListHierarchicalPlaylists)
-	api.GET("/playlists/:plid").Handle(r.trackHandler.GetPlaylist)
-	api.GET("/playlists/:plid/cover").Handle(r.trackHandler.GetPlaylistCover)
-	api.GET("/playlists/:plid/tracks").Handle(r.trackHandler.ListPlaylistTracks)
+	api.GET("/playlists").Handle(r.playlistHandler.ListPlaylists)
+	api.GET("/playlists/hierarchical").Handle(r.playlistHandler.ListHierarchicalPlaylists)
+	api.GET("/playlists/:plid").Handle(r.playlistHandler.GetPlaylist)
+	api.GET("/playlists/:plid/tracks").Handle(r.playlistHandler.ListPlaylistTracks)
 	api.GET("/playlists/:plid/tracks/:trackid").Handle(r.trackHandler.GetTrack)
 	api.GET("/playlists/:plid/tracks/:trackid/stream").Handle(r.trackHandler.StreamTrack)
-	api.GET("/playlists/:plid/tracks/:trackid/cover").Handle(r.trackHandler.GetTrackCover)
 
 	api.GET("/tracks").Handle(r.trackHandler.ListTracks)
+
+	api.GET("/covers/:cvrhash").Handle(r.coverHandler.GetCover)
 
 	// ================  ================
 
