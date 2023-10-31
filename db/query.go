@@ -45,6 +45,19 @@ func (db *Database) GetTrack(ctx context.Context, plid models.PlaylistID, trckid
 	return trck, nil
 }
 
+func (db *Database) GetTrackDirect(ctx context.Context, trckid models.TrackID) (models.Track, error) {
+	db.lock.RLock()
+	defer db.lock.RUnlock()
+
+	for _, pltracks := range db.tracks {
+		if trck, ok := pltracks[trckid]; ok {
+			return trck, nil
+		}
+	}
+
+	return models.Track{}, exerr.New(mply.ErrEntityNotFound, fmt.Sprintf("track '%s' not found", trckid)).Build()
+}
+
 func (db *Database) GetPlaylist(ctx context.Context, plid models.PlaylistID) (models.Playlist, error) {
 	db.lock.RLock()
 	defer db.lock.RUnlock()

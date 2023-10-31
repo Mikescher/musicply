@@ -258,6 +258,7 @@ async function selectPlaylist(pl) {
 
     let qp = new URLSearchParams(window.location.search);
     if (pl.id !== null) { qp.set("playlist", pl.id); } else { qp.delete('playlist'); }
+    qp.delete('track');
     history.replaceState(null, null, "?"+qp.toString());
 
     if (pl.isroot) {
@@ -269,6 +270,18 @@ async function selectPlaylist(pl) {
 
         await loadTracks(ids);
     }
+}
+
+async function playSingle(track) {
+    vm.queue.removeAll();
+    vm.playbackStatus('finished');
+    vm.playbackProgress(0);
+
+    aplayer.pause();
+    vm.playbackStatus('paused');
+
+    await enqueue(track);
+    await aplayer.play();
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -348,18 +361,7 @@ vm['onShuffle'] = function () {
 };
 
 vm['onPlaySingle'] = function (track) {
-    (async () =>
-    {
-        vm.queue.removeAll();
-        vm.playbackStatus('finished');
-        vm.playbackProgress(0);
-
-        aplayer.pause();
-        vm.playbackStatus('paused');
-
-        await enqueue(track);
-        await aplayer.play();
-    })().then();
+    playSingle(track).then();
 };
 
 vm['onEnqueueSingle'] = function (track) {
@@ -423,6 +425,14 @@ vm['onManualSeek'] = function (_, evt) {
     aplayer.currentTime = tseek;
 }
 
+vm['onCopyLink'] = function (track) {
+    let qp = new URLSearchParams(window.location.search);
+    qp.set("playlist", track.playlistID);
+    qp.set("track", track.id);
+    history.replaceState(null, null, "?"+qp.toString());
+    navigator.clipboard.writeText(window.location.origin + window.location.pathname + "?"+qp.toString()).then();
+}
+
 //----------------------------------------------------------------------------------------------------------------------
 
 ko.applyBindings(vm);
@@ -430,12 +440,39 @@ ko.applyBindings(vm);
 //----------------------------------------------------------------------------------------------------------------------
 
 let qp = new URLSearchParams(window.location.search);
-if (qp.has('playlist')) {
-    let pl = null;
-    playlist_iterate(vm['playlists_root'], (obj) => { if (obj.id === qp.get('playlist')) pl = obj; });
-    if (pl === null) {
-        console.error(`playlist '${qp.get('playlist')}' not found`);
-    } else {
-        selectPlaylist(pl).then();
-    }
+if (qp.has('track')) {
+
+    const trackid = qp.get('track');
+
+    (async () =>
+    {
+        try {
+            const resp = await fetch(`/api/v${API_LEVEL}/tracks/${trackid}`);
+            const trck = await resp.json();
+
+            let pl = null;
+            playlist_iterate(vm['playlists_root'], (obj) => { if (obj.id === trck.playlistID) pl = obj; });
+            if (pl === null) {
+                console.error(`playlist '${qp.get('playlist')}' from track ${trackid} not found`);
+            } else {
+                await selectPlaylist(pl);
+                const realTrack = vm.tracks().filter(t => t.id === trck.id)[0];
+                await playSingle(realTrack);
+            }
+        } catch (err) {
+            console.log(err)
+        }
+    })().then()
+
+} else if (qp.has('playlist')) {
+    (async () =>
+    {
+        let pl = null;
+        playlist_iterate(vm['playlists_root'], (obj) => { if (obj.id === qp.get('playlist')) pl = obj; });
+        if (pl === null) {
+            console.error(`playlist '${qp.get('playlist')}' not found`);
+        } else {
+            await selectPlaylist(pl);
+        }
+    })();
 }

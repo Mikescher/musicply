@@ -86,3 +86,23 @@ func (h TrackHandler) GetTrack(pctx ginext.PreContext) ginext.HTTPResponse {
 
 	return ginext.JSON(200, track)
 }
+
+func (h TrackHandler) GetTrackDirect(pctx ginext.PreContext) ginext.HTTPResponse {
+	type uri struct {
+		TrackId models.TrackID `uri:"trackid"`
+	}
+
+	var u uri
+	ctx, _, errResp := pctx.URI(&u).Start()
+	if errResp != nil {
+		return *errResp
+	}
+	defer ctx.Cancel()
+
+	track, err := h.app.Database.GetTrackDirect(ctx, u.TrackId)
+	if err != nil {
+		return ginext.Error(err)
+	}
+
+	return ginext.JSON(200, track)
+}

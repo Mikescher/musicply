@@ -145,8 +145,9 @@
                         </div>
 
                         <div class="col-4">
-                            <button class="btn_play"    data-bind="click: $root.onPlaySingle"    ><img draggable="false" src="/icn_play.svg"    alt="play"></button>
-                            <button class="btn_enqueue" data-bind="click: $root.onEnqueueSingle" ><img draggable="false" src="/icn_enqueue.svg" alt="enqueue"></button>
+                            <button class="btn btn_play"    data-bind="click: $root.onPlaySingle"    ><img draggable="false" src="/icn_play.svg"    alt="play"><span>Play</span></button>
+                            <button class="btn btn_enqueue" data-bind="click: $root.onEnqueueSingle" ><img draggable="false" src="/icn_enqueue.svg" alt="enqueue"><span>Enqueue</span></button>
+                            <button class="btn btn_link"    data-bind="click: $root.onCopyLink"      ><img draggable="false" src="/icn_link.svg"    alt="link"><span>Copy Link</span></button>
                         </div>
                     </div>
                 {{ safe "<!-- /ko -->" }}

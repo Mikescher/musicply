@@ -672,12 +672,29 @@ main {
 
 .container_tracks > .track .col-4 {
   display: grid;
-  grid-template-rows: 1fr 1fr;
+  grid-template-rows: 1fr 1fr 1fr;
   grid-row-gap: 4px;
   
-  width: 40px;
+  width: 100px;
   
   height: 85px;
+}
+
+.container_tracks > .track .col-4 .btn {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  padding: 0 0 0 6px;;
+  align-items: center;
+}
+
+.container_tracks > .track .col-4 .btn > img {
+  filter:  var(--filter-col-222222);
+  height: 16px;
+  width:  16px;
+}
+
+.container_tracks > .track .col-4 .btn > span {
+  
 }
 
 .container_tracks > .track .title {
@@ -695,20 +712,6 @@ main {
 }
 
 .container_tracks > .track .grow { flex-grow: 1; }
-
-.container_tracks > .track  .btn_play > img,
-.container_tracks > .track  .btn_enqueue > img {
-  filter:  var(--filter-col-222222);
-  height: 24px;
-}
-
-.container_tracks > .track  .btn_play,
-.container_tracks > .track  .btn_enqueue {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 0;
-}
 
 .container_tracks > .track > .cover {
   height: 85px;
