@@ -95,6 +95,10 @@ go.mongodb.org/mongo-driver v1.12.1 h1:nLkghSU8fQNaK7oUmDhQFsnrtcoNy7Z6LVFKsEecq
 go.mongodb.org/mongo-driver v1.12.1/go.mod h1:/rGBTebI3XYboVmgz+Wv3Bcbl3aD0QF9zl6kDDw18rQ=
 gogs.mikescher.com/BlackForestBytes/goext v0.0.291 h1:yiRHw8wV9LEZUKljvQ2MBHgeSAI6ZzajDS+FJRGnzVc=
 gogs.mikescher.com/BlackForestBytes/goext v0.0.291/go.mod h1:TtMY+/pv09fOldLO3noZ6Yfcy9KU9MjVQ0KQ9nraTeI=
+gogs.mikescher.com/BlackForestBytes/goext v0.0.296 h1:IOwToilPBV840/Ei8jA5gCfsiFijU3/7siZP2iGtl+I=
+gogs.mikescher.com/BlackForestBytes/goext v0.0.296/go.mod h1:TtMY+/pv09fOldLO3noZ6Yfcy9KU9MjVQ0KQ9nraTeI=
+gogs.mikescher.com/BlackForestBytes/goext v0.0.297 h1:PRIXzzVBgIioeRAsCSGYa0K8v7wvdM9t0n7gFAiOpFU=
+gogs.mikescher.com/BlackForestBytes/goext v0.0.297/go.mod h1:TtMY+/pv09fOldLO3noZ6Yfcy9KU9MjVQ0KQ9nraTeI=
 golang.org/x/arch v0.0.0-20210923205945-b76863e36670/go.mod h1:5om86z9Hs0C8fWVUuoMHwpExlXzs5Tkyp9hOrfG7pp8=
 golang.org/x/arch v0.5.0 h1:jpGode6huXQxcskEIpOCvrU+tzo81b6+oFLUYXWtH/Y=
 golang.org/x/arch v0.5.0/go.mod h1:5om86z9Hs0C8fWVUuoMHwpExlXzs5Tkyp9hOrfG7pp8=

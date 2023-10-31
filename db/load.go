@@ -251,7 +251,7 @@ func (db *Database) RefreshSource(src models.Source) error {
 
 		existing := langext.ArrFirstOrNil(langext.MapValueArr(db.playlists), func(pl models.Playlist) bool { return pl.SourceID == src.ID })
 
-		plid := models.NewPlaylistID()
+		plid := models.NewPlaylistIDFromPath(src.Path)
 
 		existingTrackmap := make(map[string]models.TrackID)
 		for _, v := range db.tracks[plid] {
@@ -348,7 +348,7 @@ func (db *Database) analyzeAudioFile(srcid models.SourceID, fp string, info fs.F
 	}
 
 	return models.Track{
-		ID:         models.NewTrackID(),
+		ID:         models.NewTrackIDFromPath(fp),
 		SourceID:   srcid,
 		Path:       fp,
 		FileMeta:   fm,

@@ -26,3 +26,11 @@ type PlaylistID string //@csid:type [PLS]
 type TrackID string //@csid:type [TRK]
 
 type FooterLinkID string //@csid:type [FLK]
+
+func NewPlaylistIDFromPath(path string) PlaylistID {
+	return PlaylistID(generateIDFromSeed(prefixPlaylistID, path))
+}
+
+func NewTrackIDFromPath(path string) TrackID {
+	return TrackID(generateIDFromSeed(prefixTrackID, path))
+}
