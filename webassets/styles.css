@@ -127,6 +127,12 @@ button::-moz-focus-inner, input[type="submit"]::-moz-focus-inner, input[type="re
 
 button:disabled, input[type="submit"]:disabled, input[type="reset"]:disabled, .button:disabled {
   text-shadow: 1px 1px 0 var(--button-highlight);
+  cursor: default;
+  color: grey;
+}
+
+button:disabled img, input[type="submit"]:disabled img, input[type="reset"]:disabled img, .button:disabled img {
+  filter: grayscale(1) opacity(0.3) drop-shadow( 1px 1px 0 var(--button-highlight) );  
 }
 
 /* ================================================================ INPUT ================================================================ */
@@ -232,7 +238,10 @@ input[type=range]::-moz-range-track {
   box-shadow:1px 0 0 #fff,1px 1px 0 #fff,0 1px 0 #fff,-1px 0 0 #a9a9a9,-1px -1px 0 #a9a9a9,0 -1px 0 #a9a9a9,-1px 1px 0 #fff,1px -1px #a9a9a9;
   box-sizing:border-box;
   height:2px;
-  width:100%
+  vertical-align: left;
+  justify-self: left;
+  width:calc(100% - 3px);
+  padding-left: 3px;
 }
 
 /* ================================================================ DIALOG ================================================================ */

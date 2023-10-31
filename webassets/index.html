@@ -169,31 +169,36 @@
                 {{ safe "<!-- ko foreach: queue -->" }}
 
                     {{ safe "<!-- ko if: type() === 'past' -->" }}
-                        <div class="queue_item past">
-                            <span class="title">Mama's Boy</span>
-                            <span class="length">3:39</span>
+                        <div class="queue_item past" data-bind="click: $root.onPlayPastTrack">
+                            <span class="title"  data-bind="text: (track.tags.title ?? '')"></span>
+                            <span class="length" data-bind="text: formatDuration(track.audioMeta.duration)"></span>
                         </div>
                     {{ safe "<!-- /ko -->" }}
 
                     {{ safe "<!-- ko if: type() === 'active' -->" }}
                         <div class="queue_item active">
                             <div class="cover">
-                                <img draggable="false" alt="cover" src="no_cover.png">
+                                {{ safe "<!-- ko if: track.cover !== null -->" }}
+                                <img draggable="false" alt="cover" data-bind="attr: { src: ('/api/v' + $root.apiLevel + '/covers/' + track.cover) }">
+                                {{ safe "<!-- /ko -->" }}
+                                {{ safe "<!-- ko if: track.cover === null -->" }}
+                                    <img draggable="false" alt="cover" src="/no_cover.png">
+                                {{ safe "<!-- /ko -->" }}
                             </div>
 
-                            <span class="title">I Hope You Die</span>
-                            <span class="album">Hooray For Boobies</span>
-                            <span class="artist">Bloodhound Gang</span>
+                            <span class="title"  data-bind="text: (track.tags.title  ?? '')"></span>
+                            <span class="album"  data-bind="text: (track.tags.album  ?? '')"></span>
+                            <span class="artist" data-bind="text: (track.tags.artist ?? '')"></span>
 
-                            <input class="range" type="range" min="1" max="11" value="5">
-                            <span class="length">3:39</span>
+                            <input class="range" type="range" min="0" max="1" value="0" data-bind="attr: { max: Math.floor($root.playbackTotal() ?? track.audioMeta.duration) }, value: $root.playbackProgress, event: { input: $root.onManualSeek }">
+                            <span class="length" data-bind="text: formatDuration(track.audioMeta.duration)"></span>
                         </div>
                     {{ safe "<!-- /ko -->" }}
 
                     {{ safe "<!-- ko if: type() === 'future' -->" }}
-                        <div class="queue_item future">
-                            <span class="title">Three Point One Four</span>
-                            <span class="length">3:39</span>
+                        <div class="queue_item future" data-bind="click: $root.onPlayFutureTrack">
+                            <span class="title"  data-bind="text: (track.tags.title ?? '')"></span>
+                            <span class="length" data-bind="text: formatDuration(track.audioMeta.duration)"></span>
                         </div>
                     {{ safe "<!-- /ko -->" }}
 
@@ -202,9 +207,29 @@
             </div>
 
             <div class="queue_footer">
-                <button class="btn btn_clear"    ><img draggable="false" src="/icn_clear.svg"  alt="play"><span>Clear</span></button>
+
+                {{ safe "<!-- ko if: queue().length === 0 -->" }}
+                <button class="btn btn_clear" disabled><img draggable="false" src="/icn_clear.svg" alt="play"><span>Clear</span></button>
+                {{ safe "<!-- /ko -->" }}
+
+                {{ safe "<!-- ko if: queue().length > 0 -->" }}
+                <button class="btn btn_clear" data-bind="click: $root.onQueueClear"><img draggable="false" src="/icn_clear.svg" alt="play"><span>Clear</span></button>
+                {{ safe "<!-- /ko -->" }}
+
                 <div class="grow"></div>
-                <button class="btn btn_playpause"><img draggable="false" src="/icn_pause.svg"  alt="pause"></button>
+
+                {{ safe "<!-- ko if: playbackStatus() === 'paused' -->" }}
+                    <button class="btn btn_playpause" data-bind="click: $root.playbackPlay"><img draggable="false" src="/icn_play.svg" alt="play"></button>
+                {{ safe "<!-- /ko -->" }}
+
+                {{ safe "<!-- ko if: playbackStatus() === 'finished' -->" }}
+                    <button class="btn btn_playpause" disabled ><img draggable="false" src="/icn_play.svg" alt="_"></button>
+                {{ safe "<!-- /ko -->" }}
+
+                {{ safe "<!-- ko if: playbackStatus() === 'playing' -->" }}
+                    <button class="btn btn_playpause" data-bind="click: $root.playbackPause"><img draggable="false" src="/icn_pause.svg" alt="pause"></button>
+                {{ safe "<!-- /ko -->" }}
+
             </div>
 
         </div>

@@ -16,6 +16,24 @@ function formatBitrate(v) {
     return ('@ ' + Math.round(v/1000) + ' kbit');
 }
 
+function shuffle(array) {
+    let currentIndex = array.length,  randomIndex;
+
+    // While there remain elements to shuffle.
+    while (currentIndex > 0) {
+
+        // Pick a remaining element.
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex--;
+
+        // And swap it with the current element.
+        [array[currentIndex], array[randomIndex]] = [
+            array[randomIndex], array[currentIndex]];
+    }
+
+    return array;
+}
+
 //----------------------------------------------------------------------------------------------------------------------
 
 ko.options.deferUpdates = true;
@@ -23,6 +41,50 @@ ko.options.deferUpdates = true;
 let vm = {};
 
 //----------------------------------------------------------------------------------------------------------------------
+
+const aplayer = new Audio();
+
+aplayer.addEventListener('error', function (evt) {
+    //TODO
+})
+
+aplayer.addEventListener('abort', function (evt) {
+    //TODO
+})
+
+aplayer.addEventListener('loadeddata', function (evt) {
+    vm.playbackProgress(aplayer.currentTime);
+    vm.playbackTotal(aplayer.duration);
+
+})
+
+aplayer.addEventListener('timeupdate', function (evt) {
+    vm.playbackProgress(aplayer.currentTime);
+})
+
+aplayer.addEventListener('durationchange', function (evt) {
+    vm.playbackTotal(aplayer.duration);
+})
+
+aplayer.addEventListener('seeked', function (evt) {
+    vm.playbackProgress(aplayer.currentTime);
+})
+
+aplayer.addEventListener('ended', function (evt) {
+    //TODO
+})
+
+aplayer.addEventListener('pause', function (evt) {
+    vm.playbackStatus('paused');
+})
+
+aplayer.addEventListener('play', function (evt) {
+    vm.playbackStatus('playing');
+})
+
+//----------------------------------------------------------------------------------------------------------------------
+
+const uniqueid = () => Math.ceil(Math.random() * 1000000000).toString(16).toUpperCase().padStart(8, '0');
 
 async function loadTracks(ids) {
     try {
@@ -96,11 +158,115 @@ async function searchPlaylistTracks(ids, q) {
     }
 }
 
+async function enqueue(track) {
+
+    const id = uniqueid();
+
+    if (vm.queue().length === 0) {
+
+        vm.queue.push({
+            queueID: id,
+            type: ko.observable('active'),
+            track: track,
+        });
+        await changeActiveTrack(id);
+
+    } else if (vm.queue().at(-1).type() === 'past') {
+
+        vm.queue.push({
+            queueID: id,
+            type: ko.observable('active'),
+            track: track,
+        });
+        await changeActiveTrack(id);
+
+    } else if (vm.queue().at(-1).type() === 'active') {
+
+        vm.queue.push({
+            queueID: id,
+            type: ko.observable('future'),
+            track: track,
+        });
+
+    } else if (vm.queue().at(-1).type() === 'future') {
+
+        vm.queue.push({
+            queueID: id,
+            type: ko.observable('future'),
+            track: track,
+        });
+
+    }
+
+    if (vm.playbackStatus() === 'finished') {
+        vm.playbackStatus('paused');
+
+        aplayer.pause();
+    }
+}
+
+async function changeActiveTrack(trackid) {
+
+    aplayer.pause();
+    aplayer.src = '';
+
+    let past = true;
+
+    for (const e of vm.queue()) {
+
+        if (e.queueID === trackid) {
+
+            e.type('active');
+            vm.playbackTotal(null);
+            vm.playbackProgress(0);
+            vm.playbackStatus('paused')
+
+            aplayer.src = `/api/v${API_LEVEL}/playlists/${e.track.playlistID}/tracks/${e.track.id}/stream`;
+
+            past = false;
+
+        } else if (past) {
+
+            e.type('past');
+
+        } else {
+
+            e.type('future');
+
+        }
+    }
+}
+
 //----------------------------------------------------------------------------------------------------------------------
 
 vm['playlists_root'] =  {{ listPlaylists | json_indent }};
 vm.playlists_root.children.unshift({ id: null, name: 'All', children: null, hasChildren: false, trackCount: 0 });
 playlist_iterate(vm['playlists_root'], (obj) => { obj['active'] = ko.observable(false); });
+
+vm['tracksLoading'] = ko.observable(false);
+
+vm['tracksInitial'] = ko.observable(true);
+
+vm['tracks'] = ko.observableArray(); // Track[]
+
+vm['queue'] = ko.observableArray(); // { queueID: string, type: ('past'|'active'|'future'), track: Track }[]
+
+vm['apiLevel'] = API_LEVEL;
+
+vm['searchText'] = ko.observable();
+
+vm['playbackStatus'] = ko.observable('finished'); // 'playing'|'paused'|'finished'
+
+vm['playbackProgress'] = ko.observable(0);
+
+vm['playbackTotal'] = ko.observable(null);
+
+//----------------------------------------------------------------------------------------------------------------------
+
+vm['onSearchKeyPress'] = function (data, event) {
+    if (event.keyCode === 13) vm.onSearch();
+    return true;
+};
 
 vm['onPlaylistClick'] = function (pl) {
     playlist_iterate(vm['playlists_root'], (obj) => { obj.active(false); });
@@ -116,21 +282,6 @@ vm['onPlaylistClick'] = function (pl) {
 
     loadTracks(ids).then();
 }
-
-vm['tracksLoading'] = ko.observable(false);
-
-vm['tracksInitial'] = ko.observable(true);
-
-vm['tracks'] = ko.observableArray();
-
-vm['queue'] = ko.observableArray();
-
-vm['apiLevel'] = API_LEVEL;
-
-vm['onSearchKeyPress'] = function (data, event) {
-    if (event.keyCode === 13) vm.onSearch();
-    return true;
-};
 
 vm['onSearch'] = function () {
     vm.tracksInitial(false);
@@ -152,25 +303,52 @@ vm['onSearch'] = function () {
 };
 
 vm['onPlayAll'] = function () {
-    //TODO
+    for (const t of vm.tracks()) enqueue(t).then();
 };
 
 vm['onShuffle'] = function () {
-    //TODO
+    for (const t of shuffle(vm.tracks())) enqueue(t).then();
 };
 
-vm['onPlaySingle'] = function () {
+vm['onPlaySingle'] = function (track) {
     //TODO
 };
 
 vm['onEnqueueSingle'] = function (track) {
-    vm.queue.push({
-        type: ko.observable('future'),
-        track: track,
-    });
+    enqueue(track).then();
 };
 
-vm['searchText'] = ko.observable();
+vm['onQueueClear'] = function () {
+    vm.queue.removeAll();
+    //TODO
+    vm.playbackStatus('finished');
+    vm.playbackProgress(0);
+
+    aplayer.pause();
+    aplayer.src = '';
+}
+
+vm['playbackPlay'] = function () {
+    aplayer.play().then();
+}
+
+vm['playbackPause'] = function () {
+    aplayer.pause();
+}
+
+vm['onPlayPastTrack'] = function () {
+    //TODO
+}
+
+vm['onPlayFutureTrack'] = function () {
+    //TODO
+}
+
+vm['onManualSeek'] = function (_, evt) {
+    const tseek = evt.target.valueAsNumber
+    vm.playbackProgress(tseek);
+    aplayer.currentTime = tseek;
+}
 
 //----------------------------------------------------------------------------------------------------------------------
 
