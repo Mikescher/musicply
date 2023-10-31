@@ -144,8 +144,10 @@
                             <span data-bind="text: (audioMeta.samplerate)" class="samplerate"></span>
                         </div>
 
-                        <button class="btn_play"    data-bind="click: $root.onPlaySingle"    ><img draggable="false" src="/icn_play.svg"    alt="play"></button>
-                        <button class="btn_enqueue" data-bind="click: $root.onEnqueueSingle" ><img draggable="false" src="/icn_enqueue.svg" alt="enqueue"></button>
+                        <div class="col-4">
+                            <button class="btn_play"    data-bind="click: $root.onPlaySingle"    ><img draggable="false" src="/icn_play.svg"    alt="play"></button>
+                            <button class="btn_enqueue" data-bind="click: $root.onEnqueueSingle" ><img draggable="false" src="/icn_enqueue.svg" alt="enqueue"></button>
+                        </div>
                     </div>
                 {{ safe "<!-- /ko -->" }}
 
@@ -253,6 +255,11 @@
         <span class="footer-cell commit_hash">{{ .CommitHash }}</span>
         <span class="footer-cell commit_hash">{{ .DBChecksum }}</span>
         <span class="footer-cell grow"></span>
+        <span class="footer-cell pos" data-bind="if: (($root.playbackStatus() === 'playing' || $root.playbackStatus() === 'paused') && $root.playbackTotal() !== null)">
+            <span data-bind="text: formatDuration($root.playbackProgress())"></span>
+            <span> / </span>
+            <span data-bind="text: formatDuration($root.playbackTotal())"></span>
+        </span>
         <span class="footer-cell name">MusicPly</span>
     </footer>
 

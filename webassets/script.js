@@ -249,12 +249,35 @@ async function scrollQueueEntryIntoView(queueid) {
     document.querySelector(`.queue_item[data-queue-entry-id="${queueid}"]`)?.scrollIntoView({behavior: 'smooth', block: 'nearest'});
 }
 
+async function selectPlaylist(pl) {
+    playlist_iterate(vm['playlists_root'], (obj) => { obj.active(false); });
+    pl.active(true);
+
+    vm.searchText('');
+    vm.tracksInitial(false);
+
+    let qp = new URLSearchParams(window.location.search);
+    if (pl.id !== null) { qp.set("playlist", pl.id); } else { qp.delete('playlist'); }
+    history.replaceState(null, null, "?"+qp.toString());
+
+    if (pl.isroot) {
+        vm.tracks([]); // no loading
+    } else {
+        let ids = [];
+        playlist_iterate(pl, v => ids.push(v.id));
+        ids = ids.filter(p => p !== null && p !== undefined);
+
+        await loadTracks(ids);
+    }
+}
+
 //----------------------------------------------------------------------------------------------------------------------
 
 /*{{ "vm['playlists_root'] =" | safe }}*/ /*{{ listPlaylists | json_indent }}*/;
 
 vm.playlists_root.children.unshift({ id: null, name: 'All', children: null, hasChildren: false, trackCount: 0 });
-playlist_iterate(vm['playlists_root'], (obj) => { obj['active'] = ko.observable(false); });
+playlist_iterate(vm['playlists_root'], (obj) => { obj['active'] = ko.observable(false); obj['isroot'] = false; });
+vm.playlists_root.children[0].isroot = true;
 
 vm['tracksLoading'] = ko.observable(false);
 
@@ -282,18 +305,7 @@ vm['onSearchKeyPress'] = function (data, event) {
 };
 
 vm['onPlaylistClick'] = function (pl) {
-    playlist_iterate(vm['playlists_root'], (obj) => { obj.active(false); });
-    pl.active(true);
-
-    vm.searchText('');
-
-    vm.tracksInitial(false);
-
-    let ids = [];
-    playlist_iterate(pl, v => ids.push(v.id));
-    ids = ids.filter(p => p !== null && p !== undefined);
-
-    loadTracks(ids).then();
+    selectPlaylist(pl).then();
 }
 
 vm['onSearch'] = function () {
@@ -414,3 +426,16 @@ vm['onManualSeek'] = function (_, evt) {
 //----------------------------------------------------------------------------------------------------------------------
 
 ko.applyBindings(vm);
+
+//----------------------------------------------------------------------------------------------------------------------
+
+let qp = new URLSearchParams(window.location.search);
+if (qp.has('playlist')) {
+    let pl = null;
+    playlist_iterate(vm['playlists_root'], (obj) => { if (obj.id === qp.get('playlist')) pl = obj; });
+    if (pl === null) {
+        console.error(`playlist '${qp.get('playlist')}' not found`);
+    } else {
+        selectPlaylist(pl).then();
+    }
+}
