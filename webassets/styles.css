@@ -852,6 +852,7 @@ main {
 .queue_footer {
   display: flex;
   flex-direction: row;
+  gap: 4px;
 }
 
 .queue_footer > .btn {

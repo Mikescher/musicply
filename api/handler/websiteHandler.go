@@ -189,6 +189,8 @@ func (h WebsiteHandler) buildIndexHTMLTemplate(content []byte) (webassets.ITempl
 func (h WebsiteHandler) buildScriptJSTemplate(content []byte) (webassets.ITemplate, error) {
 	t := template_text.New("script.js")
 
+	t = t.Delims("/*{{", "}}*/")
+
 	t.Funcs(template_text.FuncMap{
 		"listPlaylists": func() models.HierarchicalPlaylist {
 			v, err := h.app.ListHierarchicalPlaylists(context.Background())

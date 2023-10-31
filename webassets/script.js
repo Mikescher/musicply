@@ -1,5 +1,5 @@
 
-const API_LEVEL = {{ .APILevel }};
+/*{{ "const API_LEVEL =" | safe }}*/ /*{{ .APILevel }}*/;
 
 function playlist_iterate(obj, fn) {
     fn(obj);
@@ -18,19 +18,11 @@ function formatBitrate(v) {
 
 function shuffle(array) {
     let currentIndex = array.length,  randomIndex;
-
-    // While there remain elements to shuffle.
     while (currentIndex > 0) {
-
-        // Pick a remaining element.
         randomIndex = Math.floor(Math.random() * currentIndex);
         currentIndex--;
-
-        // And swap it with the current element.
-        [array[currentIndex], array[randomIndex]] = [
-            array[randomIndex], array[currentIndex]];
+        [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
     }
-
     return array;
 }
 
@@ -45,42 +37,36 @@ let vm = {};
 const aplayer = new Audio();
 
 aplayer.addEventListener('error', function (evt) {
-    //TODO
-})
-
-aplayer.addEventListener('abort', function (evt) {
-    //TODO
-})
+    if (vm.playbackStatus() === 'playing') vm.playbackStatus('paused');
+    vm.playbackProgress(0);
+    vm.playbackTotal(null);
+    console.error('aplayer::error', evt);
+});
 
 aplayer.addEventListener('loadeddata', function (evt) {
     vm.playbackProgress(aplayer.currentTime);
     vm.playbackTotal(aplayer.duration);
-
-})
+});
 
 aplayer.addEventListener('timeupdate', function (evt) {
     vm.playbackProgress(aplayer.currentTime);
-})
+});
 
 aplayer.addEventListener('durationchange', function (evt) {
     vm.playbackTotal(aplayer.duration);
-})
+});
 
 aplayer.addEventListener('seeked', function (evt) {
     vm.playbackProgress(aplayer.currentTime);
-})
+});
 
 aplayer.addEventListener('ended', function (evt) {
-    //TODO
-})
-
-aplayer.addEventListener('pause', function (evt) {
-    vm.playbackStatus('paused');
-})
+    playNext().then();
+});
 
 aplayer.addEventListener('play', function (evt) {
     vm.playbackStatus('playing');
-})
+});
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -169,7 +155,7 @@ async function enqueue(track) {
             type: ko.observable('active'),
             track: track,
         });
-        await changeActiveTrack(id);
+        await changeActiveQueueItem(id);
 
     } else if (vm.queue().at(-1).type() === 'past') {
 
@@ -178,7 +164,7 @@ async function enqueue(track) {
             type: ko.observable('active'),
             track: track,
         });
-        await changeActiveTrack(id);
+        await changeActiveQueueItem(id);
 
     } else if (vm.queue().at(-1).type() === 'active') {
 
@@ -198,17 +184,15 @@ async function enqueue(track) {
 
     }
 
-    if (vm.playbackStatus() === 'finished') {
-        vm.playbackStatus('paused');
+    if (vm.playbackStatus() === 'finished') vm.playbackStatus('paused');
 
-        aplayer.pause();
-    }
+    return id;
 }
 
-async function changeActiveTrack(trackid) {
+async function changeActiveQueueItem(trackid) {
 
     aplayer.pause();
-    aplayer.src = '';
+    vm.playbackStatus('paused');
 
     let past = true;
 
@@ -219,7 +203,9 @@ async function changeActiveTrack(trackid) {
             e.type('active');
             vm.playbackTotal(null);
             vm.playbackProgress(0);
-            vm.playbackStatus('paused')
+            vm.playbackStatus('paused');
+
+            await scrollQueueEntryIntoView(e.queueID);
 
             aplayer.src = `/api/v${API_LEVEL}/playlists/${e.track.playlistID}/tracks/${e.track.id}/stream`;
 
@@ -237,9 +223,36 @@ async function changeActiveTrack(trackid) {
     }
 }
 
+async function playNext() {
+    let found = false;
+    for (const e of vm.queue()) {
+        if (found) {
+            await changeActiveQueueItem(e.queueID);
+            await aplayer.play();
+            return;
+        } else if (e.type() === 'active') {
+            found = true;
+        }
+    }
+
+    // else (last queue item)
+
+    for (const e of vm.queue()) e.type('past');
+
+    aplayer.pause();
+    vm.playbackStatus('finished');
+    vm.playbackProgress(0);
+    vm.playbackTotal(null)
+}
+
+async function scrollQueueEntryIntoView(queueid) {
+    document.querySelector(`.queue_item[data-queue-entry-id="${queueid}"]`)?.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+}
+
 //----------------------------------------------------------------------------------------------------------------------
 
-vm['playlists_root'] =  {{ listPlaylists | json_indent }};
+/*{{ "vm['playlists_root'] =" | safe }}*/ /*{{ listPlaylists | json_indent }}*/;
+
 vm.playlists_root.children.unshift({ id: null, name: 'All', children: null, hasChildren: false, trackCount: 0 });
 playlist_iterate(vm['playlists_root'], (obj) => { obj['active'] = ko.observable(false); });
 
@@ -303,15 +316,38 @@ vm['onSearch'] = function () {
 };
 
 vm['onPlayAll'] = function () {
-    for (const t of vm.tracks()) enqueue(t).then();
+    (async () =>
+    {
+        aplayer.pause()
+        vm.playbackStatus('paused');
+        for (const t of vm.tracks()) await enqueue(t);
+        await aplayer.play();
+    })().then();
 };
 
 vm['onShuffle'] = function () {
-    for (const t of shuffle(vm.tracks())) enqueue(t).then();
+    (async () =>
+    {
+        aplayer.pause()
+        vm.playbackStatus('paused');
+        for (const t of shuffle(vm.tracks())) await enqueue(t);
+        await aplayer.play();
+    })().then();
 };
 
 vm['onPlaySingle'] = function (track) {
-    //TODO
+    (async () =>
+    {
+        vm.queue.removeAll();
+        vm.playbackStatus('finished');
+        vm.playbackProgress(0);
+
+        aplayer.pause();
+        vm.playbackStatus('paused');
+
+        await enqueue(track);
+        await aplayer.play();
+    })().then();
 };
 
 vm['onEnqueueSingle'] = function (track) {
@@ -320,28 +356,53 @@ vm['onEnqueueSingle'] = function (track) {
 
 vm['onQueueClear'] = function () {
     vm.queue.removeAll();
-    //TODO
-    vm.playbackStatus('finished');
-    vm.playbackProgress(0);
 
     aplayer.pause();
-    aplayer.src = '';
+    vm.playbackStatus('finished');
+    vm.playbackProgress(0);
+    vm.playbackTotal(null);
 }
 
-vm['playbackPlay'] = function () {
+vm['onPlaybackPlay'] = function () {
     aplayer.play().then();
 }
 
-vm['playbackPause'] = function () {
+vm['onPlaybackPause'] = function () {
     aplayer.pause();
+    vm.playbackStatus('paused');
 }
 
-vm['onPlayPastTrack'] = function () {
-    //TODO
+vm['onPlaybackRestart'] = function () {
+    (async () =>
+    {
+        aplayer.pause()
+        vm.playbackStatus('paused');
+        await changeActiveQueueItem(vm.queue()[0].queueID);
+        await aplayer.play();
+    })().then();
 }
 
-vm['onPlayFutureTrack'] = function () {
-    //TODO
+vm['onPlayPastTrack'] = function (queueitem) {
+    (async () =>
+    {
+        aplayer.pause()
+        vm.playbackStatus('paused');
+        await changeActiveQueueItem(queueitem.queueID);
+        await aplayer.play();
+    })().then();
+}
+
+vm['onPlayFutureTrack'] = function (queueitem) {
+    (async () => {
+        aplayer.pause()
+        vm.playbackStatus('paused');
+        await changeActiveQueueItem(queueitem.queueID);
+        await aplayer.play();
+    })().then();
+}
+
+vm['onPlayNextTrack'] = function () {
+    playNext().then();
 }
 
 vm['onManualSeek'] = function (_, evt) {
