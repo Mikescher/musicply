@@ -1,4 +1,4 @@
-DOCKER_REPO=registry.blackforestbytes.com
+DOCKER_REPO=hub.docker.com
 DOCKER_NAME=mikescher/musicply
 
 NAMESPACE=$(shell git rev-parse --abbrev-ref HEAD)

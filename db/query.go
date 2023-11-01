@@ -112,7 +112,7 @@ func (db *Database) ListPlaylists(ctx context.Context) ([]models.Playlist, error
 		r = append(r, e)
 	}
 
-	langext.SortBy(r, func(v models.Playlist) string { return v.Name })
+	langext.SortBy(r, func(v models.Playlist) int { return v.Sort })
 
 	return r, nil
 }

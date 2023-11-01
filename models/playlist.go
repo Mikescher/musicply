@@ -6,6 +6,7 @@ import (
 
 type Playlist struct {
 	ID       PlaylistID `json:"id"`
+	Sort     int        `json:"sort"`
 	SourceID SourceID   `json:"sourceID"`
 	Path     string     `json:"path"`
 	Name     string     `json:"name"`

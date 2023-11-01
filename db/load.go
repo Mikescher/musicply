@@ -12,6 +12,7 @@ import (
 	"gogs.mikescher.com/BlackForestBytes/goext/exerr"
 	"gogs.mikescher.com/BlackForestBytes/goext/fsext"
 	"gogs.mikescher.com/BlackForestBytes/goext/langext"
+	"gogs.mikescher.com/BlackForestBytes/goext/rext"
 	"gogs.mikescher.com/BlackForestBytes/goext/rfctime"
 	"io/fs"
 	mply "mikescher.com/musicply"
@@ -19,6 +20,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -28,38 +30,108 @@ import (
 
 func (db *Database) LoadSourcesFromEnv(envkey string) {
 
-	fmt.Printf("\n")
-	fmt.Printf("================ INITIALIZE SOURCES ================\n")
-	fmt.Printf("\n")
-
-	envval, ok := os.LookupEnv(envkey)
-	if !ok {
-		exerr.New(mply.ErrConfig, "No config specified (via "+envkey+" environment variable)").Fatal()
-	}
-
-	if isConfigFilepath(envval) {
-		log.Info().Msg("Load config from file '" + envval + "'")
-		v, err := os.ReadFile(envval)
-		if err != nil {
-			exerr.Wrap(err, fmt.Sprintf("failed to load config from file '%s'", envval)).Str("envval", envval).Fatal()
-		}
-		envval = string(v)
-	}
-
 	type SourceSpec struct {
 		Name      *string `json:"name"`
 		Path      *string `json:"path"`
 		Recursive *bool   `json:"recursive"`
 	}
 
+	fmt.Printf("\n")
+	fmt.Printf("================ INITIALIZE SOURCES ================\n")
+	fmt.Printf("\n")
+
 	spec := make([]SourceSpec, 0)
 
-	err := json5.Unmarshal([]byte(envval), &spec)
-	if err != nil {
-		exerr.Wrap(err, "failed to unmarshal config (from  "+envkey+" environment variable)").Fatal()
+	{
+		envval1, ok := os.LookupEnv(envkey)
+		if !ok {
+			exerr.New(mply.ErrConfig, "No config specified (via "+envkey+" environment variable)").Fatal()
+		}
+
+		envval1 = strings.TrimSpace(envval1)
+
+		if isConfigFilepath(envval1) {
+			log.Info().Msg("Load config from file '" + envval1 + "'")
+			v, err := os.ReadFile(envval1)
+			if err != nil {
+				exerr.Wrap(err, fmt.Sprintf("failed to load config from file '%s'", envval1)).Str("envval", envval1).Fatal()
+			}
+			envval1 = string(v)
+
+			spec1 := make([]SourceSpec, 0)
+			err = json5.Unmarshal([]byte(envval1), &spec1)
+			if err != nil {
+				exerr.Wrap(err, "failed to unmarshal config (from  "+envkey+" environment variable)").Fatal()
+			}
+
+			spec = append(spec, spec1...)
+
+		} else if strings.HasPrefix(envval1, "[") {
+
+			spec1 := make([]SourceSpec, 0)
+			err := json5.Unmarshal([]byte(envval1), &spec1)
+			if err != nil {
+				exerr.Wrap(err, "failed to unmarshal config (from  "+envkey+" environment variable)").Fatal()
+			}
+
+			spec = append(spec, spec1...)
+
+		} else if strings.HasPrefix(envval1, "{") {
+
+			var ss SourceSpec
+			err := json5.Unmarshal([]byte(envval1), &ss)
+			if err != nil {
+				exerr.Wrap(err, "failed to unmarshal config (from  "+envkey+" environment variable)").Fatal()
+			}
+
+			spec = append(spec, ss)
+
+		} else {
+			exerr.New(mply.ErrConfig, "failed to parse config (from  "+envkey+" environment variable) - not a valid json5-object, json5-array or filepath").Fatal()
+		}
+
 	}
 
-	for _, srcspec := range spec {
+	regexEnvs := rext.W(regexp.MustCompile("^" + regexp.QuoteMeta(envkey) + "(_[A-Z0-9]+)$"))
+
+	envs := os.Environ()
+	langext.Sort(envs)
+	for _, env := range envs {
+		idx := strings.Index(env, "=")
+		key := env[:idx]
+		val := env[idx+1:]
+		if !regexEnvs.IsMatch(key) {
+			continue
+		}
+
+		val = strings.TrimSpace(val)
+
+		if strings.HasPrefix(strings.TrimSpace(val), "[") {
+
+			spec1 := make([]SourceSpec, 0)
+			err := json5.Unmarshal([]byte(val), &spec1)
+			if err != nil {
+				exerr.Wrap(err, "failed to unmarshal config (from  "+key+" environment variable)").Fatal()
+			}
+
+			spec = append(spec, spec1...)
+
+		} else if strings.HasPrefix(strings.TrimSpace(val), "{") {
+
+			var ss SourceSpec
+			err := json5.Unmarshal([]byte(val), &ss)
+			if err != nil {
+				exerr.Wrap(err, "failed to unmarshal config (from  "+key+" environment variable)").Fatal()
+			}
+
+			spec = append(spec, ss)
+
+		} else {
+			exerr.New(mply.ErrConfig, "failed to parse config (from  "+key+" environment variable) - not a valid json5-object, json5-array or filepath").Fatal()
+		}
+	}
+
+	for ispec, srcspec := range spec {
 		if srcspec.Path == nil {
 			exerr.New(mply.ErrConfig, "missing path in source config").Fatal()
 		}
@@ -92,6 +164,7 @@ func (db *Database) LoadSourcesFromEnv(envkey string) {
 
 		src := models.Source{
 			ID:        models.NewSourceID(),
+			SortIndex: ispec,
 			Name:      name,
 			Path:      *srcspec.Path,
 			Recursive: langext.Coalesce(srcspec.Recursive, false),
@@ -264,6 +337,7 @@ func (db *Database) RefreshSource(src models.Source) error {
 
 		plst := models.Playlist{
 			ID:       plid,
+			Sort:     src.SortIndex,
 			SourceID: src.ID,
 			Name:     src.Name,
 			Path:     src.Path,
