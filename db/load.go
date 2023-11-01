@@ -421,10 +421,19 @@ func (db *Database) analyzeAudioFile(srcid models.SourceID, fp string, info fs.F
 		}
 	}
 
+	title := filepath.Base(fp)
+	if ext := filepath.Ext(title); ext != "" && len(ext) < len(title) {
+		title = title[:len(title)-len(ext)]
+	}
+	if tt.Title != nil {
+		title = *tt.Title
+	}
+
 	return models.Track{
 		ID:         models.NewTrackIDFromPath(fp),
 		SourceID:   srcid,
 		Path:       fp,
+		Title:      title,
 		FileMeta:   fm,
 		AudioMeta:  am,
 		Tags:       tt,

@@ -104,7 +104,7 @@
                         </div>
 
                         <div class="col-2">
-                            <span data-bind="text: (tags.title ?? '')" class="title"></span>
+                            <span data-bind="text: title" class="title"></span>
                             <span class="album">
                                 <span data-bind="text: (tags.album ?? '')"></span>
                                 <span class="trackindex" data-bind="if: (tags.trackIndex !== null)">
@@ -173,7 +173,7 @@
 
                     {{ safe "<!-- ko if: type() === 'past' -->" }}
                         <div class="queue_item past" data-bind="click: $root.onPlayPastTrack, attr: { 'data-queue-entry-id': queueID }">
-                            <span class="title"  data-bind="text: (track.tags.title ?? '')"></span>
+                            <span class="title"  data-bind="text: track.title"></span>
                             <span class="length" data-bind="text: formatDuration(track.audioMeta.duration)"></span>
                         </div>
                     {{ safe "<!-- /ko -->" }}
@@ -189,7 +189,7 @@
                                 {{ safe "<!-- /ko -->" }}
                             </div>
 
-                            <span class="title"  data-bind="text: (track.tags.title  ?? '')"></span>
+                            <span class="title"  data-bind="text: track.title"></span>
                             <span class="album"  data-bind="text: (track.tags.album  ?? '')"></span>
                             <span class="artist" data-bind="text: (track.tags.artist ?? '')"></span>
 
@@ -200,7 +200,7 @@
 
                     {{ safe "<!-- ko if: type() === 'future' -->" }}
                         <div class="queue_item future" data-bind="click: $root.onPlayFutureTrack, attr: { 'data-queue-entry-id': queueID }">
-                            <span class="title"  data-bind="text: (track.tags.title ?? '')"></span>
+                            <span class="title"  data-bind="text: track.title"></span>
                             <span class="length" data-bind="text: formatDuration(track.audioMeta.duration)"></span>
                         </div>
                     {{ safe "<!-- /ko -->" }}

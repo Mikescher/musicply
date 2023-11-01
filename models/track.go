@@ -12,6 +12,7 @@ type Track struct {
 	SourceID   SourceID       `json:"sourceID"`
 	PlaylistID PlaylistID     `json:"playlistID"`
 	Path       string         `json:"path"`
+	Title      string         `json:"title"`
 	FileMeta   TrackFileMeta  `json:"fileMeta"`
 	AudioMeta  TrackAudioMeta `json:"audioMeta"`
 	Tags       TrackTags      `json:"tags"`
