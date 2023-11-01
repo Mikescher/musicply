@@ -561,16 +561,21 @@ func (db *Database) getTrackTags(fp string) (models.TrackTags, error) {
 		mdDiscTotal = &b
 	}
 
+	var mdYear *int = nil
+	if y := md.Year(); y != 0 {
+		mdYear = &y
+	}
+
 	return models.TrackTags{
 		Format:      langext.Ptr(md.Format()),
 		FileType:    langext.Ptr(md.FileType()),
-		Title:       langext.Ptr(md.Title()),
-		Album:       langext.Ptr(md.Album()),
-		Artist:      langext.Ptr(md.Artist()),
-		AlbumArtist: langext.Ptr(md.AlbumArtist()),
-		Composer:    langext.Ptr(md.Composer()),
-		Year:        langext.Ptr(md.Year()),
-		Genre:       langext.Ptr(md.Genre()),
+		Title:       estrptr(md.Title()),
+		Album:       estrptr(md.Album()),
+		Artist:      estrptr(md.Artist()),
+		AlbumArtist: estrptr(md.AlbumArtist()),
+		Composer:    estrptr(md.Composer()),
+		Year:        mdYear,
+		Genre:       estrptr(md.Genre()),
 		TrackIndex:  mdTrackIndex,
 		TrackTotal:  mdTrackTotal,
 		DiscIndex:   mdDiscIndex,
