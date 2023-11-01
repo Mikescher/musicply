@@ -14,7 +14,7 @@ RUN cd /buildsrc && make clean && make build
 
 FROM alpine:latest
 
-RUN apk add --no-cache tzdata
+RUN apk add --no-cache tzdata ffmpeg
 
 COPY --from=builder   /buildsrc/_build/musicply  /app/server
 
