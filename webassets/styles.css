@@ -645,6 +645,10 @@ main {
 .container_tracks > .track  .ctime       { display: none; }
 .container_tracks > .track  .size        { display: none; }
 
+.container_tracks > .track  .year        { min-height: 1rem; }
+.container_tracks > .track  .artist      { min-height: 1rem; }
+.container_tracks > .track  .album       { min-height: 1rem; }
+
 .container_tracks > .track > .col-2,
 .container_tracks > .track > .col-3 {
   display: flex;
