@@ -651,9 +651,6 @@ main {
   flex-direction: column;
 }
 
-.container_tracks > .track > .btn_play     { grid-column: 4; grid-row: 1/-1; }
-.container_tracks > .track > .btn_enqueue  { grid-column: 5; grid-row: 1/-1; }
-
 .container_tracks > .track .col-2 {
   font-size: 14px;
   
@@ -686,6 +683,8 @@ main {
   padding: 0 0 0 6px;;
   align-items: center;
 }
+
+.container_tracks > .track .col-4 .btn.btn_play { font-weight: bold; }
 
 .container_tracks > .track .col-4 .btn > img {
   filter:  var(--filter-col-222222);

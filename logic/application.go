@@ -120,9 +120,13 @@ func (app *Application) ListHierarchicalPlaylists(ctx context.Context) (models.H
 
 		c := &root
 
+		currPathStr := ""
+
 		for ppi, pp := range path {
 
 			lastPathPart := ppi == len(path)-1
+
+			currPathStr += "/" + pp
 
 			found := false
 			for ci := 0; ci < len(c.Children); ci++ {
@@ -142,6 +146,7 @@ func (app *Application) ListHierarchicalPlaylists(ctx context.Context) (models.H
 			if !found {
 				c.Children = append(c.Children, models.HierarchicalPlaylist{
 					ID:         nil,
+					HierID:     models.NewHierarchicalPlaylistIDFromSeed("@HIERARCHICAL:" + currPathStr),
 					Name:       pp,
 					Children:   make([]models.HierarchicalPlaylist, 0),
 					Cover:      nil,
@@ -166,6 +171,7 @@ func (app *Application) ListHierarchicalPlaylists(ctx context.Context) (models.H
 
 		hplst := models.HierarchicalPlaylist{
 			ID:         langext.Ptr(plst.ID),
+			HierID:     plst.ID.ToHierarchical(),
 			Name:       parts[len(parts)-1],
 			Children:   nil,
 			Cover:      plst.Cover,

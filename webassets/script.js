@@ -257,7 +257,9 @@ async function selectPlaylist(pl) {
     vm.tracksInitial(false);
 
     let qp = new URLSearchParams(window.location.search);
-    if (pl.id !== null) { qp.set("playlist", pl.id); } else { qp.delete('playlist'); }
+    if (pl.id !== null) { qp.set("playlist", pl.id); }
+    else if (pl.hierarchicalID !== null) { qp.set("playlist", pl.hierarchicalID); }
+    else { qp.delete("playlist"); }
     qp.delete('track');
     history.replaceState(null, null, "?"+qp.toString());
 
@@ -288,7 +290,7 @@ async function playSingle(track) {
 
 /*{{ "vm['playlists_root'] =" | safe }}*/ /*{{ listPlaylists | json_indent }}*/;
 
-vm.playlists_root.children.unshift({ id: null, name: 'All', children: null, hasChildren: false, trackCount: 0 });
+vm.playlists_root.children.unshift({ id: null, hierarchicalID: null, name: 'All', children: null, hasChildren: false, trackCount: 0 });
 playlist_iterate(vm['playlists_root'], (obj) => { obj['active'] = ko.observable(false); obj['isroot'] = false; });
 vm.playlists_root.children[0].isroot = true;
 
@@ -468,7 +470,7 @@ if (qp.has('track')) {
     (async () =>
     {
         let pl = null;
-        playlist_iterate(vm['playlists_root'], (obj) => { if (obj.id === qp.get('playlist')) pl = obj; });
+        playlist_iterate(vm['playlists_root'], (obj) => { if (obj.id === qp.get('playlist') || obj.hierarchicalID === qp.get('playlist')) pl = obj; });
         if (pl === null) {
             console.error(`playlist '${qp.get('playlist')}' not found`);
         } else {

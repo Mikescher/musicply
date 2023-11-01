@@ -15,7 +15,7 @@ import "reflect"
 import "regexp"
 import "strings"
 
-const ChecksumCharsetIDGenerator = "94f6f59ef33fbfa4c5d4c62a59d9a120b53904a87cd336eed0d456a83fc17eee" // GoExtVersion: 0.0.297
+const ChecksumCharsetIDGenerator = "15e86cb39a0dba17b3dcbfa254cd2397f3bc2557065977bca9fe5dabe230ad13" // GoExtVersion: 0.0.297
 
 const idlen = 24
 
@@ -27,21 +27,23 @@ const idCharsetLen = len(idCharset)
 var charSetReverseMap = generateCharsetMap()
 
 const (
-	prefixJobLogID       = "JLG"
-	prefixJobExecutionID = "JEX"
-	prefixSourceID       = "SRC"
-	prefixPlaylistID     = "PLS"
-	prefixTrackID        = "TRK"
-	prefixFooterLinkID   = "FLK"
+	prefixJobLogID               = "JLG"
+	prefixJobExecutionID         = "JEX"
+	prefixSourceID               = "SRC"
+	prefixPlaylistID             = "PLS"
+	prefixHierarchicalPlaylistID = "HPL"
+	prefixTrackID                = "TRK"
+	prefixFooterLinkID           = "FLK"
 )
 
 var (
-	regexJobLogID       = generateRegex(prefixJobLogID)
-	regexJobExecutionID = generateRegex(prefixJobExecutionID)
-	regexSourceID       = generateRegex(prefixSourceID)
-	regexPlaylistID     = generateRegex(prefixPlaylistID)
-	regexTrackID        = generateRegex(prefixTrackID)
-	regexFooterLinkID   = generateRegex(prefixFooterLinkID)
+	regexJobLogID               = generateRegex(prefixJobLogID)
+	regexJobExecutionID         = generateRegex(prefixJobExecutionID)
+	regexSourceID               = generateRegex(prefixSourceID)
+	regexPlaylistID             = generateRegex(prefixPlaylistID)
+	regexHierarchicalPlaylistID = generateRegex(prefixHierarchicalPlaylistID)
+	regexTrackID                = generateRegex(prefixTrackID)
+	regexFooterLinkID           = generateRegex(prefixFooterLinkID)
 )
 
 func generateRegex(prefix string) rext.Regex {
@@ -283,6 +285,36 @@ func (id PlaylistID) CheckString() string {
 
 func (id PlaylistID) Regex() rext.Regex {
 	return regexPlaylistID
+}
+
+// ================================ HierarchicalPlaylistID (ids.go) ================================
+
+func NewHierarchicalPlaylistID() HierarchicalPlaylistID {
+	return HierarchicalPlaylistID(generateID(prefixHierarchicalPlaylistID))
+}
+
+func (id HierarchicalPlaylistID) Valid() error {
+	return validateID(prefixHierarchicalPlaylistID, string(id))
+}
+
+func (i HierarchicalPlaylistID) String() string {
+	return string(i)
+}
+
+func (i HierarchicalPlaylistID) Prefix() string {
+	return prefixHierarchicalPlaylistID
+}
+
+func (id HierarchicalPlaylistID) Raw() string {
+	return getRawData(prefixHierarchicalPlaylistID, string(id))
+}
+
+func (id HierarchicalPlaylistID) CheckString() string {
+	return getCheckString(prefixHierarchicalPlaylistID, string(id))
+}
+
+func (id HierarchicalPlaylistID) Regex() rext.Regex {
+	return regexHierarchicalPlaylistID
 }
 
 // ================================ TrackID (ids.go) ================================

@@ -23,6 +23,7 @@ func (p Playlist) NameParts() []string {
 
 type HierarchicalPlaylist struct {
 	ID       *PlaylistID            `json:"id"`
+	HierID   HierarchicalPlaylistID `json:"hierarchicalID"`
 	Name     string                 `json:"name"`
 	Children []HierarchicalPlaylist `json:"children"`
 
