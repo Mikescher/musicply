@@ -22,6 +22,11 @@ import (
 //go:embed *.html
 //go:embed *.js
 //go:embed *.css
+//go:embed *.ico
+//go:embed *.svg
+//go:embed *.woff
+//go:embed *.woff2
+//go:embed *.png
 var _assets embed.FS
 
 type templateCacheEntry struct {
