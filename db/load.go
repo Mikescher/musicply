@@ -361,10 +361,10 @@ func (db *Database) RefreshSource(src models.Source) error {
 			}
 		}
 
-		if plst.Cover != nil {
+		if fileCover != nil {
 			for i := 0; i < len(pltracks); i++ {
 				if pltracks[i].Cover == nil {
-					pltracks[i].Cover = plst.Cover
+					pltracks[i].Cover = langext.Ptr(fileCover.Hash)
 				}
 			}
 		}
