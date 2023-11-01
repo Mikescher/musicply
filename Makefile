@@ -1,4 +1,3 @@
-DOCKER_REPO=hub.docker.com
 DOCKER_NAME=mikescher/musicply
 
 NAMESPACE=$(shell git rev-parse --abbrev-ref HEAD)
@@ -9,7 +8,7 @@ SWAGGO=github.com/swaggo/swag/cmd/swag@$(SWAGGO_VERSION)
 
 .PHONY: fmt swagger clean run build-docker run-docker-local inspect-docker push-docker lint test
 
-build: enums ids swagger fmt lint
+build: dgi enums ids swagger fmt lint
 	mkdir -p _build
 	rm -f ./_build/musicply
 	go build -v -buildvcs=false -o _build/musicply ./cmd/server
@@ -46,9 +45,6 @@ docker: dgi
             -t "$(DOCKER_NAME):$(HASH)" \
             -t "$(DOCKER_NAME):$(NAMESPACE)-latest" \
             -t "$(DOCKER_NAME):latest" \
-            -t "$(DOCKER_REPO)/$(DOCKER_NAME):$(HASH)" \
-            -t "$(DOCKER_REPO)/$(DOCKER_NAME):$(NAMESPACE)-latest" \
-            -t "$(DOCKER_REPO)/$(DOCKER_NAME):latest" \
             .
 
 swagger-setup:
@@ -76,9 +72,9 @@ inspect-docker: docker
 	           bash
 
 push-docker:
-	docker image push "$(DOCKER_REPO)/$(DOCKER_NAME):$(HASH)"
-	docker image push "$(DOCKER_REPO)/$(DOCKER_NAME):$(NAMESPACE)-latest"
-	docker image push "$(DOCKER_REPO)/$(DOCKER_NAME):latest"
+	docker image push "$(DOCKER_NAME):$(HASH)"
+	docker image push "$(DOCKER_NAME):$(NAMESPACE)-latest"
+	docker image push "$(DOCKER_NAME):latest"
 
 clean:
 	rm -rf _build/*

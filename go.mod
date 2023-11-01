@@ -7,7 +7,7 @@ require (
 	github.com/go-playground/validator/v10 v10.15.5
 	github.com/rs/xid v1.5.0
 	github.com/rs/zerolog v1.31.0
-	gogs.mikescher.com/BlackForestBytes/goext v0.0.297
+	gogs.mikescher.com/BlackForestBytes/goext v0.0.298
 )
 
 require (

@@ -2,11 +2,13 @@
 
 FROM golang:1-alpine AS builder
 
-RUN apk add --no-cache tzdata ca-certificates openssl make git tar coreutils bash
+RUN apk add --no-cache tzdata ca-certificates openssl make git tar coreutils bash curl
 
 COPY . /buildsrc
 
-RUN cd /buildsrc && make build
+RUN curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.55.1
+
+RUN cd /buildsrc && make clean && make build
 
 
 

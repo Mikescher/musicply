@@ -99,6 +99,8 @@ gogs.mikescher.com/BlackForestBytes/goext v0.0.296 h1:IOwToilPBV840/Ei8jA5gCfsiF
 gogs.mikescher.com/BlackForestBytes/goext v0.0.296/go.mod h1:TtMY+/pv09fOldLO3noZ6Yfcy9KU9MjVQ0KQ9nraTeI=
 gogs.mikescher.com/BlackForestBytes/goext v0.0.297 h1:PRIXzzVBgIioeRAsCSGYa0K8v7wvdM9t0n7gFAiOpFU=
 gogs.mikescher.com/BlackForestBytes/goext v0.0.297/go.mod h1:TtMY+/pv09fOldLO3noZ6Yfcy9KU9MjVQ0KQ9nraTeI=
+gogs.mikescher.com/BlackForestBytes/goext v0.0.298 h1:iB1nYPQf1xe0OaJpLXbYunFHm0/P1u5wyip/yuipkQo=
+gogs.mikescher.com/BlackForestBytes/goext v0.0.298/go.mod h1:TtMY+/pv09fOldLO3noZ6Yfcy9KU9MjVQ0KQ9nraTeI=
 golang.org/x/arch v0.0.0-20210923205945-b76863e36670/go.mod h1:5om86z9Hs0C8fWVUuoMHwpExlXzs5Tkyp9hOrfG7pp8=
 golang.org/x/arch v0.5.0 h1:jpGode6huXQxcskEIpOCvrU+tzo81b6+oFLUYXWtH/Y=
 golang.org/x/arch v0.5.0/go.mod h1:5om86z9Hs0C8fWVUuoMHwpExlXzs5Tkyp9hOrfG7pp8=
