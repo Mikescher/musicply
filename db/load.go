@@ -42,12 +42,8 @@ func (db *Database) LoadSourcesFromEnv(envkey string) {
 
 	spec := make([]SourceSpec, 0)
 
-	{
-		envval1, ok := os.LookupEnv(envkey)
-		if !ok {
-			exerr.New(mply.ErrConfig, "No config specified (via "+envkey+" environment variable)").Fatal()
-		}
-
+	envval1, ok := os.LookupEnv(envkey)
+	if ok {
 		envval1 = strings.TrimSpace(envval1)
 
 		if isConfigFilepath(envval1) {
@@ -129,6 +125,10 @@ func (db *Database) LoadSourcesFromEnv(envkey string) {
 		} else {
 			exerr.New(mply.ErrConfig, "failed to parse config (from  "+key+" environment variable) - not a valid json5-object, json5-array or filepath").Fatal()
 		}
+	}
+
+	if len(spec) == 0 {
+		exerr.New(mply.ErrConfig, "No config specified (via "+envkey+" environment variable)").Fatal()
 	}
 
 	for ispec, srcspec := range spec {
