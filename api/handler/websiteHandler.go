@@ -41,6 +41,7 @@ func (h WebsiteHandler) ServeIndexHTML(pctx ginext.PreContext) ginext.HTTPRespon
 	data := map[string]any{
 		"RemoteIP":    g.RemoteIP(),
 		"BranchName":  mply.BranchName,
+		"Namespace":   mply.Conf.Namespace,
 		"CommitTime":  mply.CommitTime,
 		"VCSType":     mply.VCSType,
 		"CommitHash":  mply.CommitHash,
@@ -84,6 +85,7 @@ func (h WebsiteHandler) ServeScriptJS(pctx ginext.PreContext) ginext.HTTPRespons
 	data := map[string]any{
 		"RemoteIP":    g.RemoteIP(),
 		"BranchName":  mply.BranchName,
+		"Namespace":   mply.Conf.Namespace,
 		"CommitTime":  mply.CommitTime,
 		"VCSType":     mply.VCSType,
 		"CommitHash":  mply.CommitHash,

@@ -919,7 +919,7 @@ footer > .footer-cell.pos {
 
 footer > .footer-cell.pos > * { text-align: center; }
 
-
+footer > .footer-cell.branch_name { display: none; }
 
 
 

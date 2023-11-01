@@ -14,7 +14,7 @@ FROM alpine:latest
 
 RUN apk add --no-cache tzdata
 
-COPY --from=builder   /buildsrc/_build/bnet_backend  /app/server
+COPY --from=builder   /buildsrc/_build/musicply  /app/server
 
 RUN mkdir /data
 

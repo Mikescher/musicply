@@ -12,7 +12,12 @@ SWAGGO=github.com/swaggo/swag/cmd/swag@$(SWAGGO_VERSION)
 build: enums ids swagger fmt lint
 	mkdir -p _build
 	rm -f ./_build/musicply
-	go build -v -buildvcs=false -o _build/bnet_backend ./cmd/server
+	go build -v -buildvcs=false -o _build/musicply ./cmd/server
+
+build-quick:
+	mkdir -p _build
+	rm -f ./_build/musicply
+	go build -v -buildvcs=false -o _build/musicply ./cmd/server
 
 enums:
 	go generate models/enums.go
@@ -22,7 +27,7 @@ ids:
 
 run: build
 	mkdir -p .run-data
-	_build/bnet_backend
+	_build/musicply
 
 gow:
 	# go install github.com/mitranim/gow@latest

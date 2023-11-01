@@ -25,12 +25,25 @@ type Config struct {
 
 var defaultConf = Config{
 	Namespace:       "default",
+	ReturnRawErrors: false,
+	GinDebug:        false,
+	Custom404:       false,
+	ServerIP:        "0.0.0.0",
+	ServerPort:      "8000",
+	RequestTimeout:  16 * time.Second,
+	LogLevel:        zerolog.WarnLevel,
+	Cors:            true,
+	LiveReload:      nil,
+}
+
+var localConf = Config{
+	Namespace:       "local",
 	ReturnRawErrors: true,
 	GinDebug:        true,
 	Custom404:       false,
 	ServerIP:        "0.0.0.0",
 	ServerPort:      "8000",
-	RequestTimeout:  16 * time.Second,
+	RequestTimeout:  60 * time.Second,
 	LogLevel:        zerolog.DebugLevel,
 	Cors:            true,
 	LiveReload:      nil,
@@ -38,13 +51,14 @@ var defaultConf = Config{
 
 var allConfigs = map[string]Config{
 	"default": defaultConf,
+	"local":   localConf,
 }
 
 var Conf Config
 
 func getConfig(ns string) (Config, bool) {
 	if ns == "" {
-		ns = "local"
+		ns = "default"
 	}
 	if conf, ok := allConfigs[ns]; ok {
 		err := confext.ApplyEnvOverrides("", &conf, "_")
