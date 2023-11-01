@@ -88,7 +88,7 @@ func (db *Database) LoadSourcesFromEnv(envkey string) {
 
 	}
 
-	regexEnvs := rext.W(regexp.MustCompile("^" + regexp.QuoteMeta(envkey) + "(_[A-Z0-9]+)$"))
+	regexEnvs := rext.W(regexp.MustCompile("^" + regexp.QuoteMeta(envkey) + "(_[A-Z_0-9]+)$"))
 
 	envs := os.Environ()
 	langext.Sort(envs)
