@@ -103,5 +103,39 @@ The following environment variables can also be used to configure the applicatio
 - `CORS` Enable CORS headers (default: true)
 - `LOGLEVEL`, `CUSTOM_404`, `GIN_DEBUG`, `RETURN_RAW_ERRORS` Enable more logoutput (default: 'WARN', false, false, false)
 
+### Additional Configuration (Footer Links)
+
 You can also show additional buttons under the playlist-control by supplying `/FOOTERLINK_[0-9]/` env variables.  
 The variables must contain 3, semicolon-seperated values: `${icon-path};${Tooltip};${Link}`
+
+### Additional Configuration (Deduplication)
+
+You can specify a deduplication strategy per-source.
+This removes duplicate tracks from the enumerated playlists:
+
+```
+SOURCE_1='{
+             name: "Hotel California", 
+             path: "/data/Eagles/HotelCalifornia", 
+             deduplicate: { keys: ["title", "artist"], use: "newest" 
+          }'
+```
+
+The `keys` field specifies which trac-data are used to identify duplicates (tracks where all keys are equal will be duplicates).  
+The possible values are:
+
+ - `title`
+ - `artist`
+ - `album`
+ - `year`
+ - `track_index`
+ - `track_total`
+ - `filename`
+
+The `use` field specifies which track will be used (the other ones will be discarded).  
+The possible values are:
+
+ - `any`: Use any track without a specific strategy 
+ - `newest`: Use the newest track (by file creation-time)
+ - `oldest`: Use the oldest track (by file creation-time)
+ - `biggest`: Use the track with the largest file-size

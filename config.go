@@ -31,7 +31,7 @@ var defaultConf = Config{
 	ServerIP:        "0.0.0.0",
 	ServerPort:      "8000",
 	RequestTimeout:  16 * time.Second,
-	LogLevel:        zerolog.WarnLevel,
+	LogLevel:        zerolog.DebugLevel,
 	Cors:            true,
 	LiveReload:      nil,
 }

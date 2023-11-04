@@ -30,10 +30,16 @@ import (
 
 func (db *Database) LoadSourcesFromEnv(envkey string) {
 
+	type DedupSpec struct {
+		Keys []string `json:"keys"`
+		Use  *string  `json:"use"`
+	}
+
 	type SourceSpec struct {
-		Name      *string `json:"name"`
-		Path      *string `json:"path"`
-		Recursive *bool   `json:"recursive"`
+		Name        *string    `json:"name"`
+		Path        *string    `json:"path"`
+		Deduplicate *DedupSpec `json:"deduplicate"`
+		Recursive   *bool      `json:"recursive"`
 	}
 
 	fmt.Printf("\n")
@@ -159,15 +165,40 @@ func (db *Database) LoadSourcesFromEnv(envkey string) {
 		}
 
 		if langext.ArrAny(db.sources, func(src models.Source) bool { return src.Name == name }) {
-			exerr.New(mply.ErrSourceNotFound, fmt.Sprintf("Duplicate source name '%s'", name)).Str("name", name).Fatal()
+			exerr.New(mply.ErrConfig, fmt.Sprintf("Duplicate source name '%s'", name)).Str("name", name).Fatal()
+		}
+
+		var dedup *models.DedupliationConfig = nil
+		if srcspec.Deduplicate != nil {
+			dedup = &models.DedupliationConfig{} //nolint:exhaustruct
+			for _, key := range srcspec.Deduplicate.Keys {
+				if v, ok := models.ParseDeDupKey(key); ok {
+					dedup.Keys = append(dedup.Keys, v)
+				} else {
+					exerr.New(mply.ErrConfig, fmt.Sprintf("Unknown deduplication.key '%s'", key)).Fatal()
+				}
+			}
+			if len(dedup.Keys) == 0 {
+				exerr.New(mply.ErrConfig, "Missing deduplicate.keys config").Fatal()
+			}
+			if srcspec.Deduplicate.Use != nil {
+				if v, ok := models.ParseDeDupSelector(*srcspec.Deduplicate.Use); ok {
+					dedup.Selector = v
+				} else {
+					exerr.New(mply.ErrConfig, fmt.Sprintf("Unknown deduplication.use '%s'", *srcspec.Deduplicate.Use)).Fatal()
+				}
+			} else {
+				dedup.Selector = models.DeDupSelectorAny
+			}
 		}
 
 		src := models.Source{
-			ID:        models.NewSourceID(),
-			SortIndex: ispec,
-			Name:      name,
-			Path:      *srcspec.Path,
-			Recursive: langext.Coalesce(srcspec.Recursive, false),
+			ID:            models.NewSourceID(),
+			SortIndex:     ispec,
+			Name:          name,
+			Path:          *srcspec.Path,
+			Recursive:     langext.Coalesce(srcspec.Recursive, false),
+			Deduplication: dedup,
 		}
 
 		db.sources = append(db.sources, src)
@@ -233,6 +264,8 @@ func (db *Database) RefreshAllInitial() {
 }
 
 func (db *Database) RefreshSource(src models.Source) error {
+
+	fmt.Printf("Refreshing source %s ('%s')\n", src.ID, src.Path)
 
 	files := make([]dataext.Tuple[string, fs.FileInfo], 0)
 
@@ -344,12 +377,16 @@ func (db *Database) RefreshSource(src models.Source) error {
 			Cover:    langext.ConditionalFn01(fileCover == nil, nil, func() *models.CoverHash { return langext.Ptr(fileCover.Hash) }),
 		}
 
-		pltracks := tracks
+		pltracks := langext.ArrCopy(tracks)
 		for i := 0; i < len(pltracks); i++ {
 			if v, ok := existingTrackmap[pltracks[i].Path]; ok {
 				pltracks[i].ID = v
 			}
 			pltracks[i].PlaylistID = plst.ID
+		}
+
+		if src.Deduplication != nil {
+			pltracks = src.Deduplication.Apply(pltracks)
 		}
 
 		sort.SliceStable(pltracks, func(i1, i2 int) bool { return models.CompareTracks(pltracks[i1], pltracks[i2]) })
@@ -382,6 +419,7 @@ func (db *Database) RefreshSource(src models.Source) error {
 	}
 
 	fmt.Printf("Found %d tracks and %d playlists in source '%s'\n", len(tracks), len(playlists), src.Name)
+	fmt.Printf("\n")
 
 	for _, v := range playlists {
 		db.playlists[v.V1.ID] = v.V1

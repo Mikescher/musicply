@@ -5,7 +5,161 @@ package models
 import "gogs.mikescher.com/BlackForestBytes/goext/langext"
 import "gogs.mikescher.com/BlackForestBytes/goext/enums"
 
-const ChecksumEnumGenerator = "94f6f59ef33fbfa4c5d4c62a59d9a120b53904a87cd336eed0d456a83fc17eee" // GoExtVersion: 0.0.297
+const ChecksumEnumGenerator = "8adba60e7288b1e071f9802c8db7ced3e4a8b93ade479542716627c604812f05" // GoExtVersion: 0.0.298
+
+// ================================ DeDupKey ================================
+//
+// File:       enums.go
+// StringEnum: true
+// DescrEnum:  false
+//
+
+var __DeDupKeyValues = []DeDupKey{
+	DeDupKeyTitle,
+	DeDupKeyArtist,
+	DeDupKeyAlbum,
+	DeDupKeyYear,
+	DeDupKeyTrackIndex,
+	DeDupKeyTrackTotal,
+	DeDupKeyFilename,
+}
+
+var __DeDupKeyVarnames = map[DeDupKey]string{
+	DeDupKeyTitle:      "DeDupKeyTitle",
+	DeDupKeyArtist:     "DeDupKeyArtist",
+	DeDupKeyAlbum:      "DeDupKeyAlbum",
+	DeDupKeyYear:       "DeDupKeyYear",
+	DeDupKeyTrackIndex: "DeDupKeyTrackIndex",
+	DeDupKeyTrackTotal: "DeDupKeyTrackTotal",
+	DeDupKeyFilename:   "DeDupKeyFilename",
+}
+
+func (e DeDupKey) Valid() bool {
+	return langext.InArray(e, __DeDupKeyValues)
+}
+
+func (e DeDupKey) Values() []DeDupKey {
+	return __DeDupKeyValues
+}
+
+func (e DeDupKey) ValuesAny() []any {
+	return langext.ArrCastToAny(__DeDupKeyValues)
+}
+
+func (e DeDupKey) ValuesMeta() []enums.EnumMetaValue {
+	return DeDupKeyValuesMeta()
+}
+
+func (e DeDupKey) String() string {
+	return string(e)
+}
+
+func (e DeDupKey) VarName() string {
+	if d, ok := __DeDupKeyVarnames[e]; ok {
+		return d
+	}
+	return ""
+}
+
+func (e DeDupKey) Meta() enums.EnumMetaValue {
+	return enums.EnumMetaValue{VarName: e.VarName(), Value: e, Description: nil}
+}
+
+func ParseDeDupKey(vv string) (DeDupKey, bool) {
+	for _, ev := range __DeDupKeyValues {
+		if string(ev) == vv {
+			return ev, true
+		}
+	}
+	return "", false
+}
+
+func DeDupKeyValues() []DeDupKey {
+	return __DeDupKeyValues
+}
+
+func DeDupKeyValuesMeta() []enums.EnumMetaValue {
+	return []enums.EnumMetaValue{
+		DeDupKeyTitle.Meta(),
+		DeDupKeyArtist.Meta(),
+		DeDupKeyAlbum.Meta(),
+		DeDupKeyYear.Meta(),
+		DeDupKeyTrackIndex.Meta(),
+		DeDupKeyTrackTotal.Meta(),
+		DeDupKeyFilename.Meta(),
+	}
+}
+
+// ================================ DeDupSelector ================================
+//
+// File:       enums.go
+// StringEnum: true
+// DescrEnum:  false
+//
+
+var __DeDupSelectorValues = []DeDupSelector{
+	DeDupSelectorNewest,
+	DeDupSelectorOldest,
+	DeDupSelectorAny,
+}
+
+var __DeDupSelectorVarnames = map[DeDupSelector]string{
+	DeDupSelectorNewest: "DeDupSelectorNewest",
+	DeDupSelectorOldest: "DeDupSelectorOldest",
+	DeDupSelectorAny:    "DeDupSelectorAny",
+}
+
+func (e DeDupSelector) Valid() bool {
+	return langext.InArray(e, __DeDupSelectorValues)
+}
+
+func (e DeDupSelector) Values() []DeDupSelector {
+	return __DeDupSelectorValues
+}
+
+func (e DeDupSelector) ValuesAny() []any {
+	return langext.ArrCastToAny(__DeDupSelectorValues)
+}
+
+func (e DeDupSelector) ValuesMeta() []enums.EnumMetaValue {
+	return DeDupSelectorValuesMeta()
+}
+
+func (e DeDupSelector) String() string {
+	return string(e)
+}
+
+func (e DeDupSelector) VarName() string {
+	if d, ok := __DeDupSelectorVarnames[e]; ok {
+		return d
+	}
+	return ""
+}
+
+func (e DeDupSelector) Meta() enums.EnumMetaValue {
+	return enums.EnumMetaValue{VarName: e.VarName(), Value: e, Description: nil}
+}
+
+func ParseDeDupSelector(vv string) (DeDupSelector, bool) {
+	for _, ev := range __DeDupSelectorValues {
+		if string(ev) == vv {
+			return ev, true
+		}
+	}
+	return "", false
+}
+
+func DeDupSelectorValues() []DeDupSelector {
+	return __DeDupSelectorValues
+}
+
+func DeDupSelectorValuesMeta() []enums.EnumMetaValue {
+	return []enums.EnumMetaValue{
+		DeDupSelectorNewest.Meta(),
+		DeDupSelectorOldest.Meta(),
+		DeDupSelectorAny.Meta(),
+	}
+}
 
 // ================================ JobStatus ================================
 //
