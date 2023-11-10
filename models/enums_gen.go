@@ -5,7 +5,7 @@ package models
 import "gogs.mikescher.com/BlackForestBytes/goext/langext"
 import "gogs.mikescher.com/BlackForestBytes/goext/enums"
 
-const ChecksumEnumGenerator = "8adba60e7288b1e071f9802c8db7ced3e4a8b93ade479542716627c604812f05" // GoExtVersion: 0.0.298
+const ChecksumEnumGenerator = "3994e3b6543a32c15671bfb89934864a035ecc8cc9778a30602cabf37be96ee6" // GoExtVersion: 0.0.298
 
 // ================================ DeDupKey ================================
 //
@@ -98,15 +98,17 @@ func DeDupKeyValuesMeta() []enums.EnumMetaValue {
 //
 
 var __DeDupSelectorValues = []DeDupSelector{
+	DeDupSelectorAny,
 	DeDupSelectorNewest,
 	DeDupSelectorOldest,
-	DeDupSelectorAny,
+	DeDupSelectorBiggest,
 }
 
 var __DeDupSelectorVarnames = map[DeDupSelector]string{
-	DeDupSelectorNewest: "DeDupSelectorNewest",
-	DeDupSelectorOldest: "DeDupSelectorOldest",
-	DeDupSelectorAny:    "DeDupSelectorAny",
+	DeDupSelectorAny:     "DeDupSelectorAny",
+	DeDupSelectorNewest:  "DeDupSelectorNewest",
+	DeDupSelectorOldest:  "DeDupSelectorOldest",
+	DeDupSelectorBiggest: "DeDupSelectorBiggest",
 }
 
 func (e DeDupSelector) Valid() bool {
@@ -155,9 +157,10 @@ func DeDupSelectorValues() []DeDupSelector {
 
 func DeDupSelectorValuesMeta() []enums.EnumMetaValue {
 	return []enums.EnumMetaValue{
+		DeDupSelectorAny.Meta(),
 		DeDupSelectorNewest.Meta(),
 		DeDupSelectorOldest.Meta(),
-		DeDupSelectorAny.Meta(),
+		DeDupSelectorBiggest.Meta(),
 	}
 }
 

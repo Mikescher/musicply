@@ -71,10 +71,10 @@
 
             </div>
 
-            <div class="container_tracks" data-bind="css: { loading: tracksLoading, empty: (!tracksLoading() && tracks().length === 0), initial: tracksInitial }">
+            <div class="container_tracks initial" data-bind="css: { loading: tracksLoading, empty: (!tracksLoading() && tracks().length === 0), initial: tracksInitial }">
 
                 {{ safe "<!-- ko if: tracksLoading -->" }}
-                    <div data-bind="if: tracksLoading" class="window loading-dlg" style="width: 320px">
+                    <div class="window loading-dlg" style="width: 320px;">
                         <div class="title-bar">
                             <div class="title-bar-text">Loading...</div>
                         </div>
@@ -85,11 +85,11 @@
                 {{ safe "<!-- /ko -->" }}
 
                 {{ safe "<!-- ko if: tracksInitial -->" }}
-                    <img class="logoInitial" draggable="false" src="logo.png" alt="logo">
+                    <img data-bind="visible: true" class="logoInitial" draggable="false" src="logo.png" alt="logo" style="display: none;">
                 {{ safe "<!-- /ko -->" }}
 
                 {{ safe "<!-- ko foreach: tracks -->" }}
-                    <div class="track">
+                    <div data-bind="visible: true" class="track" style="display: none;">
                         <span data-bind="text: id" class="track_id"></span>
                         <span data-bind="text: sourceID" class="source_id"></span>
                         <span data-bind="text: playlistID" class="playlist_id"></span>
@@ -117,7 +117,7 @@
                                     <span> ]</span>
                                 </span>
                             </span>
-                            <span data-bind="text: (tags.artist ?? '')" class="artist">Bloodhound Gang</span>
+                            <span data-bind="text: (tags.artist ?? '')" class="artist">...</span>
                         </div>
 
                         <div class="col-3">
@@ -153,17 +153,15 @@
                 {{ safe "<!-- /ko -->" }}
 
                 {{ safe "<!-- ko if: ( !tracksLoading() && !tracksInitial() && tracks().length === 0 ) -->" }}
-                    <img class="logoEmpty" draggable="false" src="/icn_empty.svg" alt="empty">
+                    <img data-bind="visible: true" class="logoEmpty" draggable="false" src="/icn_empty.svg" alt="empty" style="display: none;">
                 {{ safe "<!-- /ko -->" }}
-
-
             </div>
 
         </div>
 
         <div class="container_queue">
 
-            <div class="queue" data-bind="css: { empty: ( queue().length === 0 ) }">
+            <div class="queue empty" data-bind="css: { empty: ( queue().length === 0 ) }">
 
                 {{ safe "<!-- ko if: ( queue().length === 0 ) -->" }}
                 <img class="logoEmpty" draggable="false" src="/icn_empty.svg" alt="empty">
@@ -172,14 +170,14 @@
                 {{ safe "<!-- ko foreach: queue -->" }}
 
                     {{ safe "<!-- ko if: type() === 'past' -->" }}
-                        <div class="queue_item past" data-bind="click: $root.onPlayPastTrack, attr: { 'data-queue-entry-id': queueID }">
+                        <div class="queue_item past" data-bind="visible: true, click: $root.onPlayPastTrack, attr: { 'data-queue-entry-id': queueID }" style="display: none;">
                             <span class="title"  data-bind="text: track.title"></span>
                             <span class="length" data-bind="text: formatDuration(track.audioMeta.duration)"></span>
                         </div>
                     {{ safe "<!-- /ko -->" }}
 
                     {{ safe "<!-- ko if: type() === 'active' -->" }}
-                        <div class="queue_item active" data-bind="attr: { 'data-queue-entry-id': queueID }">
+                        <div class="queue_item active" data-bind="visible: true, attr: { 'data-queue-entry-id': queueID }" style="display: none;">
                             <div class="cover">
                                 {{ safe "<!-- ko if: track.cover !== null -->" }}
                                 <img draggable="false" alt="cover" data-bind="attr: { src: ('/api/v' + $root.apiLevel + '/covers/' + track.cover) }">
@@ -199,7 +197,7 @@
                     {{ safe "<!-- /ko -->" }}
 
                     {{ safe "<!-- ko if: type() === 'future' -->" }}
-                        <div class="queue_item future" data-bind="click: $root.onPlayFutureTrack, attr: { 'data-queue-entry-id': queueID }">
+                        <div class="queue_item future" data-bind="visible: true, click: $root.onPlayFutureTrack, attr: { 'data-queue-entry-id': queueID }" style="display: none;">
                             <span class="title"  data-bind="text: track.title"></span>
                             <span class="length" data-bind="text: formatDuration(track.audioMeta.duration)"></span>
                         </div>
@@ -209,7 +207,7 @@
 
             </div>
 
-            <div class="queue_footer">
+            <div data-bind="visible: true" class="queue_footer" style="display: none;">
 
                 {{ safe "<!-- ko if: queue().length === 0 -->" }}
                 <button class="btn btn_clear" disabled><img draggable="false" src="/icn_clear.svg" alt="play"><span>Clear</span></button>
@@ -226,11 +224,11 @@
                 {{ safe "<!-- /ko -->" }}
 
                 {{ safe "<!-- ko if: (playbackStatus() === 'finished' && queue().length === 0) -->" }}
-                <button class="btn btn_playpause" disabled ><img draggable="false" src="/icn_play.svg" alt="_"></button>
+                    <button class="btn btn_playpause" disabled ><img draggable="false" src="/icn_play.svg" alt="_"></button>
                 {{ safe "<!-- /ko -->" }}
 
                 {{ safe "<!-- ko if: (playbackStatus() === 'finished' && queue().length > 0) -->" }}
-                <button class="btn btn_playpause" data-bind="click: $root.onPlaybackRestart"><img draggable="false" src="/icn_play.svg" alt="_"></button>
+                    <button class="btn btn_playpause" data-bind="click: $root.onPlaybackRestart"><img draggable="false" src="/icn_play.svg" alt="_"></button>
                 {{ safe "<!-- /ko -->" }}
 
                 {{ safe "<!-- ko if: playbackStatus() === 'playing' -->" }}
@@ -252,12 +250,12 @@
 
     <footer>
         <span class="footer-cell branch_name">{{ .BranchName }}</span>
-        <span class="footer-cell namespace">{{ .Namespace }}</span>
+        <span class="footer-cell namespace"  >{{ .Namespace }}</span>
         <span class="footer-cell commit_time">{{ .CommitTime }}</span>
         <span class="footer-cell commit_hash">{{ .CommitHash }}</span>
         <span class="footer-cell commit_hash">{{ .DBChecksum }}</span>
         <span class="footer-cell grow"></span>
-        <span class="footer-cell pos" data-bind="if: (($root.playbackStatus() === 'playing' || $root.playbackStatus() === 'paused') && $root.playbackTotal() !== null)">
+        <span class="footer-cell pos" data-bind="visible: true, if: (($root.playbackStatus() === 'playing' || $root.playbackStatus() === 'paused') && $root.playbackTotal() !== null)" style="display: none;">
             <span data-bind="text: formatDuration($root.playbackProgress())"></span>
             <span> / </span>
             <span data-bind="text: formatDuration($root.playbackTotal())"></span>
