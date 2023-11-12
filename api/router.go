@@ -90,6 +90,7 @@ func (r *Router) Init(e *ginext.GinWrapper) {
 	api.GET("/covers/:cvrhash").Handle(r.coverHandler.GetCover)
 
 	api.POST("/refresh").Handle(r.databaseHandler.RefreshSources)
+	api.POST("/refresh/:sourceid").Handle(r.databaseHandler.RefreshSingleSource)
 
 	// ================  ================
 

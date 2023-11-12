@@ -633,6 +633,8 @@ main {
 .container_tracks > .track > .track_id    { display: none; }
 .container_tracks > .track > .source_id   { display: none; }
 .container_tracks > .track > .playlist_id { display: none; }
+.container_tracks > .track > .filepath    { display: none; }
+.container_tracks > .track > .filename    { display: none; }
 
 .container_tracks > .track > .cover       { grid-column: 1; grid-row: 1/-1; }
 

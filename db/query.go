@@ -141,3 +141,16 @@ func (db *Database) ListSources(ctx context.Context) []models.Source {
 
 	return r
 }
+
+func (db *Database) GetSource(ctx context.Context, sid models.SourceID) (models.Source, error) {
+	db.lock.RLock()
+	defer db.lock.RUnlock()
+
+	for _, v := range db.sources {
+		if v.ID == sid {
+			return v, nil
+		}
+	}
+
+	return models.Source{}, exerr.New(mply.ErrEntityNotFound, fmt.Sprintf("source '%s' not found", sid)).Build()
+}

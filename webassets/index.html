@@ -93,6 +93,8 @@
                         <span data-bind="text: id" class="track_id"></span>
                         <span data-bind="text: sourceID" class="source_id"></span>
                         <span data-bind="text: playlistID" class="playlist_id"></span>
+                        <span data-bind="text: (path ?? '')" class="filepath"></span>
+                        <span data-bind="text: (fileMeta.filename ?? '')" class="filename"></span>
 
                         <div class="cover">
                             {{ safe "<!-- ko if: cover !== null -->" }}
@@ -117,7 +119,7 @@
                                     <span> ]</span>
                                 </span>
                             </span>
-                            <span data-bind="text: (tags.artist ?? '')" class="artist">...</span>
+                            <span data-bind="text: (tags.artist ?? '')" class="artist"></span>
                         </div>
 
                         <div class="col-3">
