@@ -40,6 +40,7 @@ func (db *Database) LoadSourcesFromEnv(envkey string) {
 		Path        *string    `json:"path"`
 		Deduplicate *DedupSpec `json:"deduplicate"`
 		Recursive   *bool      `json:"recursive"`
+		Sort        *[]string  `json:"sort"`
 	}
 
 	fmt.Printf("\n")
@@ -192,6 +193,19 @@ func (db *Database) LoadSourcesFromEnv(envkey string) {
 			}
 		}
 
+		skey := make([]models.SortKey, 0)
+		if srcspec.Sort != nil {
+			for _, v := range *srcspec.Sort {
+				if v, ok := models.ParseSortKey(v); ok {
+					skey = append(skey, v)
+				} else {
+					exerr.New(mply.ErrConfig, fmt.Sprintf("Unknown sort '%s'", v)).Fatal()
+				}
+			}
+		} else {
+			skey = []models.SortKey{models.SortArtist, models.SortAlbum, models.SortTrackIndex, models.SortFilename}
+		}
+
 		src := models.Source{
 			ID:            models.NewSourceID(),
 			SortIndex:     ispec,
@@ -199,6 +213,7 @@ func (db *Database) LoadSourcesFromEnv(envkey string) {
 			Path:          *srcspec.Path,
 			Recursive:     langext.Coalesce(srcspec.Recursive, false),
 			Deduplication: dedup,
+			TrackSort:     skey,
 		}
 
 		db.sources = append(db.sources, src)
@@ -369,12 +384,13 @@ func (db *Database) RefreshSource(src models.Source) error {
 		}
 
 		plst := models.Playlist{
-			ID:       plid,
-			Sort:     src.SortIndex,
-			SourceID: src.ID,
-			Name:     src.Name,
-			Path:     src.Path,
-			Cover:    langext.ConditionalFn01(fileCover == nil, nil, func() *models.CoverHash { return langext.Ptr(fileCover.Hash) }),
+			ID:        plid,
+			Sort:      src.SortIndex,
+			SourceID:  src.ID,
+			Name:      src.Name,
+			Path:      src.Path,
+			Cover:     langext.ConditionalFn01(fileCover == nil, nil, func() *models.CoverHash { return langext.Ptr(fileCover.Hash) }),
+			TrackSort: src.TrackSort,
 		}
 
 		pltracks := langext.ArrCopy(tracks)
@@ -389,7 +405,7 @@ func (db *Database) RefreshSource(src models.Source) error {
 			pltracks = src.Deduplication.Apply(pltracks)
 		}
 
-		sort.SliceStable(pltracks, func(i1, i2 int) bool { return models.CompareTracks(pltracks[i1], pltracks[i2]) })
+		sort.SliceStable(pltracks, func(i1, i2 int) bool { return models.CompareTracks(src.TrackSort, pltracks[i1], pltracks[i2]) })
 
 		if plst.Cover == nil {
 			coverTrack := langext.ArrFirstOrNil(pltracks, func(v models.Track) bool { return v.Tags.Picture != nil })

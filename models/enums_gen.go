@@ -5,7 +5,7 @@ package models
 import "gogs.mikescher.com/BlackForestBytes/goext/langext"
 import "gogs.mikescher.com/BlackForestBytes/goext/enums"
 
-const ChecksumEnumGenerator = "3994e3b6543a32c15671bfb89934864a035ecc8cc9778a30602cabf37be96ee6" // GoExtVersion: 0.0.298
+const ChecksumEnumGenerator = "1bdb9e4607543607fd5936933dc739d6521b589894fa63ee0778aa1540fd064e" // GoExtVersion: 0.0.298
 
 // ================================ DeDupKey ================================
 //
@@ -161,6 +161,98 @@ func DeDupSelectorValuesMeta() []enums.EnumMetaValue {
 		DeDupSelectorNewest.Meta(),
 		DeDupSelectorOldest.Meta(),
 		DeDupSelectorBiggest.Meta(),
+	}
+}
+
+// ================================ SortKey ================================
+//
+// File:       enums.go
+// StringEnum: true
+// DescrEnum:  false
+//
+
+var __SortKeyValues = []SortKey{
+	SortFilename,
+	SortFilepath,
+	SortTitle,
+	SortArtist,
+	SortAlbum,
+	SortTrackIndex,
+	SortYear,
+	SortFileCDate,
+	SortFileMDate,
+	SortFileADate,
+}
+
+var __SortKeyVarnames = map[SortKey]string{
+	SortFilename:   "SortFilename",
+	SortFilepath:   "SortFilepath",
+	SortTitle:      "SortTitle",
+	SortArtist:     "SortArtist",
+	SortAlbum:      "SortAlbum",
+	SortTrackIndex: "SortTrackIndex",
+	SortYear:       "SortYear",
+	SortFileCDate:  "SortFileCDate",
+	SortFileMDate:  "SortFileMDate",
+	SortFileADate:  "SortFileADate",
+}
+
+func (e SortKey) Valid() bool {
+	return langext.InArray(e, __SortKeyValues)
+}
+
+func (e SortKey) Values() []SortKey {
+	return __SortKeyValues
+}
+
+func (e SortKey) ValuesAny() []any {
+	return langext.ArrCastToAny(__SortKeyValues)
+}
+
+func (e SortKey) ValuesMeta() []enums.EnumMetaValue {
+	return SortKeyValuesMeta()
+}
+
+func (e SortKey) String() string {
+	return string(e)
+}
+
+func (e SortKey) VarName() string {
+	if d, ok := __SortKeyVarnames[e]; ok {
+		return d
+	}
+	return ""
+}
+
+func (e SortKey) Meta() enums.EnumMetaValue {
+	return enums.EnumMetaValue{VarName: e.VarName(), Value: e, Description: nil}
+}
+
+func ParseSortKey(vv string) (SortKey, bool) {
+	for _, ev := range __SortKeyValues {
+		if string(ev) == vv {
+			return ev, true
+		}
+	}
+	return "", false
+}
+
+func SortKeyValues() []SortKey {
+	return __SortKeyValues
+}
+
+func SortKeyValuesMeta() []enums.EnumMetaValue {
+	return []enums.EnumMetaValue{
+		SortFilename.Meta(),
+		SortFilepath.Meta(),
+		SortTitle.Meta(),
+		SortArtist.Meta(),
+		SortAlbum.Meta(),
+		SortTrackIndex.Meta(),
+		SortYear.Meta(),
+		SortFileCDate.Meta(),
+		SortFileMDate.Meta(),
+		SortFileADate.Meta(),
 	}
 }
 

@@ -22,3 +22,18 @@ const (
 	DeDupSelectorOldest  DeDupSelector = "oldest"
 	DeDupSelectorBiggest DeDupSelector = "biggest"
 )
+
+type SortKey string //@enum:type
+
+const (
+	SortFilename   SortKey = "filename"
+	SortFilepath   SortKey = "filepath"
+	SortTitle      SortKey = "title"
+	SortArtist     SortKey = "artist"
+	SortAlbum      SortKey = "album"
+	SortTrackIndex SortKey = "trackindex"
+	SortYear       SortKey = "year"
+	SortFileCDate  SortKey = "cdate"
+	SortFileMDate  SortKey = "mdate"
+	SortFileADate  SortKey = "adate"
+)

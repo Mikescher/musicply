@@ -13,6 +13,7 @@ type Source struct {
 	Path          string
 	Recursive     bool
 	Deduplication *DedupliationConfig
+	TrackSort     []SortKey
 }
 
 type DedupliationConfig struct {

@@ -151,6 +151,7 @@ func (app *Application) ListHierarchicalPlaylists(ctx context.Context) (models.H
 					Children:   make([]models.HierarchicalPlaylist, 0),
 					Cover:      nil,
 					TrackCount: 0,
+					TrackSort:  make([]models.SortKey, 0),
 				})
 				if lastPathPart {
 					r := &(c.Children[len(c.Children)-1])
@@ -176,6 +177,7 @@ func (app *Application) ListHierarchicalPlaylists(ctx context.Context) (models.H
 			Children:   nil,
 			Cover:      plst.Cover,
 			TrackCount: 0,
+			TrackSort:  plst.TrackSort,
 		}
 
 		hp.Children = append(hp.Children, hplst)

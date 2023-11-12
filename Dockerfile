@@ -17,6 +17,7 @@ FROM alpine:latest
 RUN apk add --no-cache tzdata ffmpeg
 
 COPY --from=builder   /buildsrc/_build/musicply  /app/server
+COPY                 ./DOCKER_GIT_INFO           /DOCKER_GIT_INFO
 
 RUN mkdir /data
 

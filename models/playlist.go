@@ -5,13 +5,13 @@ import (
 )
 
 type Playlist struct {
-	ID       PlaylistID `json:"id"`
-	Sort     int        `json:"sort"`
-	SourceID SourceID   `json:"sourceID"`
-	Path     string     `json:"path"`
-	Name     string     `json:"name"`
-
-	Cover *CoverHash `json:"cover"`
+	ID        PlaylistID `json:"id"`
+	Sort      int        `json:"sort"`
+	SourceID  SourceID   `json:"sourceID"`
+	Path      string     `json:"path"`
+	Name      string     `json:"name"`
+	Cover     *CoverHash `json:"cover"`
+	TrackSort []SortKey  `json:"trackSort"`
 }
 
 func (p Playlist) NameParts() []string {
@@ -23,11 +23,11 @@ func (p Playlist) NameParts() []string {
 }
 
 type HierarchicalPlaylist struct {
-	ID       *PlaylistID            `json:"id"`
-	HierID   HierarchicalPlaylistID `json:"hierarchicalID"`
-	Name     string                 `json:"name"`
-	Children []HierarchicalPlaylist `json:"children"`
-
-	TrackCount int        `json:"trackCount"`
-	Cover      *CoverHash `json:"cover"`
+	ID         *PlaylistID            `json:"id"`
+	HierID     HierarchicalPlaylistID `json:"hierarchicalID"`
+	Name       string                 `json:"name"`
+	Children   []HierarchicalPlaylist `json:"children"`
+	TrackCount int                    `json:"trackCount"`
+	Cover      *CoverHash             `json:"cover"`
+	TrackSort  []SortKey              `json:"trackSort"`
 }

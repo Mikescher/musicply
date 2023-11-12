@@ -15,17 +15,20 @@ func (db *Database) ListTracks(ctx context.Context) ([]models.Track, error) {
 	db.lock.RLock()
 	defer db.lock.RUnlock()
 
-	r := make([]models.Track, 0, len(db.tracks)*32)
+	playlists := langext.MapValueArr(db.playlists)
+	langext.SortBy(playlists, func(v models.Playlist) int { return v.Sort })
+
+	rAll := make([]models.Track, 0, len(db.tracks)*32)
 
 	for _, playlist := range db.playlists {
-		for _, track := range db.tracks[playlist.ID] {
-			r = append(r, track)
-		}
+
+		rPTracks := langext.MapValueArr(db.tracks[playlist.ID])
+		sort.SliceStable(rPTracks, func(i1, i2 int) bool { return models.CompareTracks(playlist.TrackSort, rPTracks[i1], rPTracks[i2]) })
+
+		rAll = append(rAll, rPTracks...)
 	}
 
-	sort.SliceStable(r, func(i1, i2 int) bool { return models.CompareTracks(r[i1], r[i2]) })
-
-	return r, nil
+	return rAll, nil
 }
 
 func (db *Database) GetTrack(ctx context.Context, plid models.PlaylistID, trckid models.TrackID) (models.Track, error) {
@@ -74,7 +77,7 @@ func (db *Database) ListPlaylistTracks(ctx context.Context, plid models.Playlist
 	db.lock.RLock()
 	defer db.lock.RUnlock()
 
-	_, ok := db.playlists[plid]
+	playlist, ok := db.playlists[plid]
 	if !ok {
 		return nil, exerr.New(mply.ErrEntityNotFound, fmt.Sprintf("playlist '%s' not found", plid)).Build()
 	}
@@ -85,7 +88,7 @@ func (db *Database) ListPlaylistTracks(ctx context.Context, plid models.Playlist
 		r = append(r, track)
 	}
 
-	sort.SliceStable(r, func(i1, i2 int) bool { return models.CompareTracks(r[i1], r[i2]) })
+	sort.SliceStable(r, func(i1, i2 int) bool { return models.CompareTracks(playlist.TrackSort, r[i1], r[i2]) })
 
 	return r, nil
 }

@@ -108,6 +108,30 @@ The following environment variables can also be used to configure the applicatio
 You can also show additional buttons under the playlist-control by supplying `/FOOTERLINK_[0-9]/` env variables.  
 The variables must contain 3, semicolon-seperated values: `${icon-path};${Tooltip};${Link}`
 
+### Additional Configuration (Track sort)
+
+You can manually override the sort order of tracks in a playlist by specifying an `sort` array in your source:
+
+```
+SOURCE_1='{
+             name: "Hotel California", 
+             path: "/data/Eagles/HotelCalifornia", 
+             sort: ["artist", "album", "trackindex", "filename"], 
+          }'
+```
+
+In the above case we first sort by **artist**, then by **album**, then **track-index** and lastly by **filename** (this is also the default if no `sort` is specified).  
+The possible values are:
+ - `filename`
+ - `filepath`
+ - `title`
+ - `artist`
+ - `album`
+ - `trackindex`
+ - `year`
+ - `cdate`
+ - `mdate`
+
 ### Additional Configuration (Deduplication)
 
 You can specify a deduplication strategy per-source.
@@ -121,7 +145,7 @@ SOURCE_1='{
           }'
 ```
 
-The `keys` field specifies which trac-data are used to identify duplicates (tracks where all keys are equal will be duplicates).  
+The `keys` field specifies which track-data are used to identify duplicates (tracks where all keys are equal will be duplicates).  
 The possible values are:
 
  - `title`

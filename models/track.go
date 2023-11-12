@@ -108,24 +108,73 @@ type TrackTags struct {
 	Raw         *map[string]any `json:"-"`
 }
 
-func CompareTracks(t1 Track, t2 Track) bool {
-	if t1.Tags.Artist != nil && t2.Tags.Artist != nil && *t1.Tags.Artist != *t2.Tags.Artist {
-		return *t1.Tags.Artist < *t2.Tags.Artist
-	}
+func CompareTracks(sortarr []SortKey, t1 Track, t2 Track) bool {
 
-	if t1.Tags.Album != nil && t2.Tags.Album != nil && *t1.Tags.Album != *t2.Tags.Album {
-		return *t1.Tags.Album < *t2.Tags.Album
-	}
+	for _, skey := range sortarr {
 
-	if t1.Tags.TrackIndex != nil && t2.Tags.TrackIndex != nil {
+		switch skey {
 
-		if t1.Tags.TrackTotal != nil && t2.Tags.TrackTotal != nil && *t1.Tags.TrackTotal == *t2.Tags.TrackTotal && *t1.Tags.TrackIndex != *t2.Tags.TrackIndex {
-			return *t1.Tags.TrackIndex < *t2.Tags.TrackIndex
-		} else if *t1.Tags.TrackIndex != *t2.Tags.TrackIndex && t1.Tags.TrackTotal == nil && t2.Tags.TrackTotal == nil {
-			return *t1.Tags.TrackIndex < *t2.Tags.TrackIndex
+		case SortFilename:
+			if t1.FileMeta.Filename != t2.FileMeta.Filename {
+				return t1.FileMeta.Filename < t2.FileMeta.Filename
+			}
+
+		case SortFilepath:
+			if t1.Path != t2.Path {
+				return t1.Path < t2.Path
+			}
+
+		case SortTitle:
+			if t1.Tags.Title != nil && t2.Tags.Title != nil && t1.Tags.Title != t2.Tags.Title {
+				return *t1.Tags.Title < *t2.Tags.Title
+			}
+
+		case SortArtist:
+			if t1.Tags.Artist != nil && t2.Tags.Artist != nil && *t1.Tags.Artist != *t2.Tags.Artist {
+				return *t1.Tags.Artist < *t2.Tags.Artist
+			}
+
+		case SortAlbum:
+			if t1.Tags.Album != nil && t2.Tags.Album != nil && *t1.Tags.Album != *t2.Tags.Album {
+				return *t1.Tags.Album < *t2.Tags.Album
+			}
+
+		case SortTrackIndex:
+			if t1.Tags.TrackIndex != nil && t2.Tags.TrackIndex != nil {
+				if t1.Tags.TrackTotal != nil && t2.Tags.TrackTotal != nil && *t1.Tags.TrackTotal == *t2.Tags.TrackTotal && *t1.Tags.TrackIndex != *t2.Tags.TrackIndex {
+					return *t1.Tags.TrackIndex < *t2.Tags.TrackIndex
+				} else if *t1.Tags.TrackIndex != *t2.Tags.TrackIndex && t1.Tags.TrackTotal == nil && t2.Tags.TrackTotal == nil {
+					return *t1.Tags.TrackIndex < *t2.Tags.TrackIndex
+				}
+			}
+
+		case SortYear:
+			if t1.Tags.Year != nil && t2.Tags.Year != nil && t1.Tags.Year != t2.Tags.Year {
+				return *t1.Tags.Year < *t2.Tags.Year
+			}
+
+		case SortFileMDate:
+			if t1.FileMeta.ModTime != t2.FileMeta.ModTime {
+				return t1.FileMeta.ModTime.Unix() < t2.FileMeta.ModTime.Unix()
+			}
+
+		case SortFileCDate:
+			if t1.FileMeta.CTime != nil && t2.FileMeta.CTime != nil && t1.FileMeta.CTime != t2.FileMeta.CTime {
+				return t1.FileMeta.CTime.Unix() < t2.FileMeta.CTime.Unix()
+			}
+
+		case SortFileADate:
+			if t1.FileMeta.ATime != nil && t2.FileMeta.ATime != nil && t1.FileMeta.ATime != t2.FileMeta.ATime {
+				return t1.FileMeta.ATime.Unix() < t2.FileMeta.ATime.Unix()
+			}
+
+		default:
+			panic("unknown sort-key: " + skey)
+
 		}
 
 	}
 
-	return t1.FileMeta.Filename < t2.FileMeta.Filename
+	return false
+
 }
