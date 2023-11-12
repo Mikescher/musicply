@@ -1,6 +1,7 @@
 package db
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"github.com/dhowden/tag"
@@ -14,9 +15,12 @@ import (
 	"gogs.mikescher.com/BlackForestBytes/goext/langext"
 	"gogs.mikescher.com/BlackForestBytes/goext/rext"
 	"gogs.mikescher.com/BlackForestBytes/goext/rfctime"
+	"gogs.mikescher.com/BlackForestBytes/goext/syncext"
 	"io/fs"
 	mply "mikescher.com/musicply"
 	"mikescher.com/musicply/models"
+	"net"
+	"net/http"
 	"os"
 	"path"
 	"path/filepath"
@@ -260,13 +264,82 @@ func isConfigFilepath(v string) bool {
 
 func (db *Database) RefreshAllInitial() {
 
+	currSourceConf := syncext.NewAtomic[string]("")
+	currIndex := syncext.NewAtomic[int](0)
+	currLog := syncext.NewAtomic[string]("")
+
+	//nolint:exhaustruct
+	server := &http.Server{
+		Addr:              net.JoinHostPort(mply.Conf.ServerIP, mply.Conf.ServerPort),
+		ReadHeaderTimeout: 3 * time.Second,
+		Handler: http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+			if request.Method == "GET" && request.URL.Path == "/" {
+
+				r := ""
+
+				r += `<html>` + "\n"
+				r += `  <head>` + "\n"
+				r += `    <title>MusicPly</title>` + "\n"
+				r += `  </head>` + "\n"
+				r += `<body>`
+				r += `<div id="content" style="white-space: pre; font-family: monospace;"></div>` + "\n"
+				r += `<script type="text/javascript">`
+				r += `    (async () => {` + "\n"
+				r += `        while (true) {` + "\n"
+				r += `            try {` + "\n"
+				r += `                const r = await fetch('/$/__init_status');` + "\n"
+				r += `                if (r.status !== 200) {location.reload(); return;}` + "\n"
+				r += `                document.getElementById("content").innerText = await r.text();` + "\n"
+				r += `                await new Promise(resolve => setTimeout(resolve, 100));` + "\n"
+				r += `            } catch (err) {` + "\n"
+				r += `                console.log(err)` + "\n"
+				r += `                document.getElementById("content").innerText = '(failed to fetch data)';` + "\n"
+				r += `                await new Promise(resolve => setTimeout(resolve, 500));` + "\n"
+				r += `            }` + "\n"
+				r += `        }` + "\n"
+				r += `    })().then();` + "\n"
+				r += `</script>`
+				r += `</body>` + "\n"
+				r += `</html>` + "\n"
+
+				writer.Header().Set("Content-Type", "text/html")
+				_, _ = writer.Write([]byte(r))
+
+			} else if request.Method == "GET" && request.URL.Path == "/$/__init_status" {
+
+				r := ""
+
+				r += "\n"
+				r += "================================================================\n"
+				r += "                MusicPly is being initialized...                \n"
+				r += "================================================================\n"
+				r += "\n"
+				r += "\n"
+				r += fmt.Sprintf("Initializing Sources: %d/%d\n", currIndex.Get(), len(db.sources))
+				r += "\n"
+				r += fmt.Sprintf("%s\n", currSourceConf.Get())
+				r += "\n"
+				r += currLog.Get() + "\n"
+
+				writer.Header().Set("Content-Type", "text/plain")
+				_, _ = writer.Write([]byte(r))
+
+			}
+		})}
+
+	go func() { _ = server.ListenAndServe() }()
+
 	fmt.Printf("\n")
 	fmt.Printf("================ ENUMERATE SOURCES ================\n")
 	fmt.Printf("\n")
 
-	for _, src := range db.sources {
+	for i, src := range db.sources {
 
-		err := db.RefreshSource(src)
+		currSourceConf.Set(src.String())
+		currIndex.Set(i + 1)
+		currLog.Set("")
+
+		err := db.RefreshSource(src, func(v string) { currLog.Set(currLog.Get() + v + "\n") })
 		if err != nil {
 			exerr.Wrap(err, "").Fatal()
 		}
@@ -276,11 +349,18 @@ func (db *Database) RefreshAllInitial() {
 	fmt.Printf("================ ================== ================\n")
 	fmt.Printf("\n")
 
+	err := server.Shutdown(context.Background())
+	if err != nil {
+		exerr.Wrap(err, "").Fatal()
+	}
 }
 
-func (db *Database) RefreshSource(src models.Source) error {
+func (db *Database) RefreshSource(src models.Source, logger func(v string)) error {
 
 	fmt.Printf("Refreshing source %s ('%s')\n", src.ID, src.Path)
+
+	logger("Listing files")
+	logger("")
 
 	files := make([]dataext.Tuple[string, fs.FileInfo], 0)
 
@@ -324,6 +404,9 @@ func (db *Database) RefreshSource(src models.Source) error {
 		return langext.InArray(filepath.Ext(strings.ToLower(v.V1)), []string{".mp3", ".flac", ".m4a", ".ogg", ".wav", ".wma"})
 	})
 
+	logger(fmt.Sprintf("Found %d files", len(files)))
+	logger("")
+
 	covers := make([]models.CoverData, 0)
 
 	tracks := make([]models.Track, 0, len(files))
@@ -332,10 +415,13 @@ func (db *Database) RefreshSource(src models.Source) error {
 		fp := fobj.V1
 		info := fobj.V2
 
+		logger(fmt.Sprintf("Analyze file '%s'", filepath.Base(fp)))
+
 		track, coverdata, err := db.analyzeAudioFile(src.ID, fp, info)
 		if err != nil {
 			log.Error().Msg(fmt.Sprintf("Failed to parse track from file '%s'", fp))
 			exerr.Wrap(err, "").Print()
+			logger(fmt.Sprintf("  [!] -> Failed to analyze file '%s'", filepath.Base(fp)))
 			continue
 		}
 
@@ -345,10 +431,16 @@ func (db *Database) RefreshSource(src models.Source) error {
 		}
 	}
 
+	logger(fmt.Sprintf("Found %d tracks", len(tracks)))
+	logger("")
+
 	var fileCover *models.CoverData = nil
 	if len(potentialCovers) > 0 {
 		mime := mply.FilenameToMime(potentialCovers[0].V1, "")
 		if mime != "" {
+
+			logger(fmt.Sprintf("Reading cover-file '%s'", filepath.Base(potentialCovers[0].V1)))
+
 			bin, err := os.ReadFile(potentialCovers[0].V1)
 			if err != nil {
 				log.Error().Msg(fmt.Sprintf("Failed to parse load cover file '%s'", potentialCovers[0].V1))
@@ -363,6 +455,9 @@ func (db *Database) RefreshSource(src models.Source) error {
 		}
 
 	}
+
+	logger("Creating playlist")
+	logger("")
 
 	db.lock.Lock()
 	defer db.lock.Unlock()
@@ -441,6 +536,10 @@ func (db *Database) RefreshSource(src models.Source) error {
 		db.playlists[v.V1.ID] = v.V1
 		db.tracks[v.V1.ID] = langext.ArrToMap(v.V2, func(v models.Track) models.TrackID { return v.ID })
 	}
+
+	logger("")
+	logger("Done.")
+	logger("")
 
 	db.recalcChecksum(false)
 

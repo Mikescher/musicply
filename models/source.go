@@ -16,6 +16,30 @@ type Source struct {
 	TrackSort     []SortKey
 }
 
+func (s Source) String() string {
+
+	ddc := "NULL"
+	if s.Deduplication != nil {
+		if b, err := json.Marshal(*s.Deduplication); err == nil {
+			ddc = string(b)
+		} else {
+			ddc = "ERR"
+		}
+	}
+
+	v := "Source {" + "\n"
+	v += "    ID:            " + s.ID.String() + "\n"
+	v += "    SortIndex:     " + fmt.Sprintf("%d", s.SortIndex) + "\n"
+	v += "    Name:          " + s.Name + "\n"
+	v += "    Path:          " + s.Path + "\n"
+	v += "    Recursive:     " + fmt.Sprintf("%#v", s.Recursive) + "\n"
+	v += "    Deduplication: " + ddc + "\n"
+	v += "    TrackSort:     " + fmt.Sprintf("%v", s.TrackSort) + "\n"
+	v += "}"
+
+	return v
+}
+
 type DedupliationConfig struct {
 	Keys     []DeDupKey
 	Selector DeDupSelector

@@ -30,7 +30,7 @@ func (h DatabaseHandler) RefreshSources(pctx ginext.PreContext) ginext.HTTPRespo
 	sources := h.app.Database.ListSources(ctx)
 
 	for _, src := range sources {
-		err := h.app.Database.RefreshSource(src)
+		err := h.app.Database.RefreshSource(src, func(v string) { /*noop*/ })
 		if err != nil {
 			return ginext.Error(err)
 		}
@@ -59,7 +59,7 @@ func (h DatabaseHandler) RefreshSingleSource(pctx ginext.PreContext) ginext.HTTP
 		return ginext.Error(err)
 	}
 
-	err = h.app.Database.RefreshSource(src)
+	err = h.app.Database.RefreshSource(src, func(v string) { /*noop*/ })
 	if err != nil {
 		return ginext.Error(err)
 	}

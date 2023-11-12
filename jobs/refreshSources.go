@@ -19,7 +19,7 @@ func runRefreshSources(ctx context.Context, app *logic.Application, lstr *JobLis
 	sources := app.Database.ListSources(ctx)
 
 	for _, src := range sources {
-		err := app.Database.RefreshSource(src)
+		err := app.Database.RefreshSource(src, func(v string) { /*noop*/ })
 		if err != nil {
 			return 0, exerr.Wrap(err, "failed to refresh source").Str("path", src.Path).Build()
 		}
