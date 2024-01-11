@@ -392,11 +392,11 @@ func (db *Database) RefreshSource(src models.Source, logger func(v string)) erro
 
 	potentialCovers := langext.ArrFilter(files, func(v dataext.Tuple[string, fs.FileInfo]) bool {
 		return langext.InArray(filepath.Base(strings.ToLower(v.V1)), []string{
-			"cover.png", "cover.jpeg", "cover.jpg", "cover.bmp", "cover.gif", "cover.webm",
-			"folder.png", "folder.jpeg", "folder.jpg", "folder.bmp", "folder.gif", "folder.webm",
-			"albumart.png", "albumart.jpeg", "albumart.jpg", "albumart.bmp", "albumart.gif", "albumart.webm",
-			"albumartsmall.png", "albumartsmall.jpeg", "albumartsmall.jpg", "albumartsmall.bmp", "albumartsmall.gif", "albumartsmall.webm",
-			"front.png", "front.jpeg", "front.jpg", "front.bmp", "front.gif", "front.webm",
+			"cover.png", "cover.jpeg", "cover.jpg", "cover.bmp", "cover.gif", "cover.webm", "cover.webp",
+			"folder.png", "folder.jpeg", "folder.jpg", "folder.bmp", "folder.gif", "folder.webm", "folder.webp",
+			"albumart.png", "albumart.jpeg", "albumart.jpg", "albumart.bmp", "albumart.gif", "albumart.webm", "albumart.webp",
+			"albumartsmall.png", "albumartsmall.jpeg", "albumartsmall.jpg", "albumartsmall.bmp", "albumartsmall.gif", "albumartsmall.webm", "albumartsmall.webp",
+			"front.png", "front.jpeg", "front.jpg", "front.bmp", "front.gif", "front.webm", "front.webp",
 		})
 	})
 

@@ -28,8 +28,14 @@ func FilenameToMime(fn string, fallback string) string {
 	if strings.HasSuffix(lowerFN, ".gif") {
 		return "image/gif"
 	}
+	if strings.HasSuffix(lowerFN, ".weba") {
+		return "audio/weba"
+	}
 	if strings.HasSuffix(lowerFN, ".webp") {
-		return "audio/webm"
+		return "image/webp"
+	}
+	if strings.HasSuffix(lowerFN, ".webm") {
+		return "video/webm"
 	}
 	if strings.HasSuffix(lowerFN, ".bmp") {
 		return "image/bmp"
