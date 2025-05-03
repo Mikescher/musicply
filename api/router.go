@@ -2,7 +2,7 @@ package api
 
 import (
 	"fmt"
-	"gogs.mikescher.com/BlackForestBytes/goext/ginext"
+	"git.blackforestbytes.com/BlackForestBytes/goext/ginext"
 	mply "mikescher.com/musicply"
 	"mikescher.com/musicply/api/handler"
 	"mikescher.com/musicply/logic"

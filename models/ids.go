@@ -1,7 +1,7 @@
 package models
 
 import (
-	"gogs.mikescher.com/BlackForestBytes/goext/rext"
+	"git.blackforestbytes.com/BlackForestBytes/goext/rext"
 )
 
 //go:generate go run ../_gen/id-generate.go -- ids_gen.go

@@ -2,7 +2,7 @@ package jobs
 
 import (
 	"context"
-	"gogs.mikescher.com/BlackForestBytes/goext/exerr"
+	"git.blackforestbytes.com/BlackForestBytes/goext/exerr"
 	"mikescher.com/musicply/logic"
 	"time"
 )

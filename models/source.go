@@ -2,8 +2,8 @@ package models
 
 import (
 	"fmt"
-	json "gogs.mikescher.com/BlackForestBytes/goext/gojson"
-	"gogs.mikescher.com/BlackForestBytes/goext/langext"
+	json "git.blackforestbytes.com/BlackForestBytes/goext/gojson"
+	"git.blackforestbytes.com/BlackForestBytes/goext/langext"
 )
 
 type Source struct {

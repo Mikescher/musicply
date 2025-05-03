@@ -1,7 +1,7 @@
 package main
 
 import (
-	"gogs.mikescher.com/BlackForestBytes/goext/bfcodegen"
+	"git.blackforestbytes.com/BlackForestBytes/goext/bfcodegen"
 	"os"
 )
 
@@ -13,7 +13,7 @@ func main() {
 		panic(err)
 	}
 
-	err = bfcodegen.GenerateCharsetIDSpecs(wd, dest)
+	err = bfcodegen.GenerateCharsetIDSpecs(wd, dest, bfcodegen.CSIDGenOptions{})
 	if err != nil {
 		panic(err)
 	}

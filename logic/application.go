@@ -2,10 +2,10 @@ package logic
 
 import (
 	"context"
+	"git.blackforestbytes.com/BlackForestBytes/goext/ginext"
+	"git.blackforestbytes.com/BlackForestBytes/goext/langext"
+	"git.blackforestbytes.com/BlackForestBytes/goext/syncext"
 	"github.com/rs/zerolog/log"
-	"gogs.mikescher.com/BlackForestBytes/goext/ginext"
-	"gogs.mikescher.com/BlackForestBytes/goext/langext"
-	"gogs.mikescher.com/BlackForestBytes/goext/syncext"
 	mply "mikescher.com/musicply"
 	"mikescher.com/musicply/db"
 	"mikescher.com/musicply/models"

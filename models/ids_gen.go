@@ -7,15 +7,15 @@ import "crypto/sha256"
 import "fmt"
 import "github.com/go-playground/validator/v10"
 import "github.com/rs/zerolog/log"
-import "gogs.mikescher.com/BlackForestBytes/goext/exerr"
-import "gogs.mikescher.com/BlackForestBytes/goext/langext"
-import "gogs.mikescher.com/BlackForestBytes/goext/rext"
+import "git.blackforestbytes.com/BlackForestBytes/goext/exerr"
+import "git.blackforestbytes.com/BlackForestBytes/goext/langext"
+import "git.blackforestbytes.com/BlackForestBytes/goext/rext"
 import "math/big"
 import "reflect"
 import "regexp"
 import "strings"
 
-const ChecksumCharsetIDGenerator = "fa176c56648aef784bfce56579c4a729b2f98aa60bab586e31a81f3b3ad96802" // GoExtVersion: 0.0.315
+const ChecksumCharsetIDGenerator = "9995bc9d23da604b04481b6f8347fab1982cdb8b74512ab5c8a67d4d808d9ebb" // GoExtVersion: 0.0.572
 
 const idlen = 24
 

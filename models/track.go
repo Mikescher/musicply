@@ -1,8 +1,8 @@
 package models
 
 import (
+	"git.blackforestbytes.com/BlackForestBytes/goext/rfctime"
 	"github.com/dhowden/tag"
-	"gogs.mikescher.com/BlackForestBytes/goext/rfctime"
 	"io/fs"
 	"strings"
 )

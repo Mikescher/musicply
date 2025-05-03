@@ -3,9 +3,9 @@ package db
 import (
 	"context"
 	"fmt"
-	"gogs.mikescher.com/BlackForestBytes/goext/exerr"
-	"gogs.mikescher.com/BlackForestBytes/goext/ginext"
-	"gogs.mikescher.com/BlackForestBytes/goext/langext"
+	"git.blackforestbytes.com/BlackForestBytes/goext/exerr"
+	"git.blackforestbytes.com/BlackForestBytes/goext/ginext"
+	"git.blackforestbytes.com/BlackForestBytes/goext/langext"
 	mply "mikescher.com/musicply"
 	"mikescher.com/musicply/models"
 	"sort"

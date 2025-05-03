@@ -1,12 +1,12 @@
 package mply
 
 import (
+	"git.blackforestbytes.com/BlackForestBytes/goext/exerr"
+	"git.blackforestbytes.com/BlackForestBytes/goext/langext"
 	"github.com/gin-gonic/gin"
 	"github.com/rs/xid"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"gogs.mikescher.com/BlackForestBytes/goext/exerr"
-	"gogs.mikescher.com/BlackForestBytes/goext/langext"
 	"os"
 )
 

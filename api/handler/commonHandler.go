@@ -2,9 +2,9 @@ package handler
 
 import (
 	"bytes"
+	"git.blackforestbytes.com/BlackForestBytes/goext/ginext"
+	"git.blackforestbytes.com/BlackForestBytes/goext/timeext"
 	"github.com/gin-gonic/gin"
-	"gogs.mikescher.com/BlackForestBytes/goext/ginext"
-	"gogs.mikescher.com/BlackForestBytes/goext/timeext"
 	"mikescher.com/musicply/logic"
 	"net/http"
 	"time"

@@ -1,7 +1,7 @@
 package jobs
 
 import (
-	"gogs.mikescher.com/BlackForestBytes/goext/rfctime"
+	"git.blackforestbytes.com/BlackForestBytes/goext/rfctime"
 	"mikescher.com/musicply/logic"
 	"mikescher.com/musicply/models"
 	"time"

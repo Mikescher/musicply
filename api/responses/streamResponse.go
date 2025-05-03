@@ -1,8 +1,8 @@
 package responses
 
 import (
+	"git.blackforestbytes.com/BlackForestBytes/goext/ginext"
 	"github.com/gin-gonic/gin"
-	"gogs.mikescher.com/BlackForestBytes/goext/ginext"
 )
 
 type headerval struct {

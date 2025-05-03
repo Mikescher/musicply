@@ -3,8 +3,8 @@ package swagger
 import (
 	"embed"
 	_ "embed"
+	"git.blackforestbytes.com/BlackForestBytes/goext/ginext"
 	"github.com/gin-gonic/gin"
-	"gogs.mikescher.com/BlackForestBytes/goext/ginext"
 	mply "mikescher.com/musicply"
 	"net/http"
 	"strings"

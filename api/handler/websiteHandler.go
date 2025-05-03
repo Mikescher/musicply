@@ -3,9 +3,9 @@ package handler
 import (
 	"bytes"
 	"context"
+	"git.blackforestbytes.com/BlackForestBytes/goext/ginext"
+	json "git.blackforestbytes.com/BlackForestBytes/goext/gojson"
 	"github.com/gin-gonic/gin"
-	"gogs.mikescher.com/BlackForestBytes/goext/ginext"
-	json "gogs.mikescher.com/BlackForestBytes/goext/gojson"
 	template_html "html/template"
 	mply "mikescher.com/musicply"
 	"mikescher.com/musicply/logic"

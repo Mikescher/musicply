@@ -1,9 +1,9 @@
 package mply
 
 import (
+	"git.blackforestbytes.com/BlackForestBytes/goext/confext"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"gogs.mikescher.com/BlackForestBytes/goext/confext"
 	"os"
 	"time"
 )

@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"gogs.mikescher.com/BlackForestBytes/goext/ginext"
+	"git.blackforestbytes.com/BlackForestBytes/goext/ginext"
 	"mikescher.com/musicply/logic"
 	"mikescher.com/musicply/models"
 )

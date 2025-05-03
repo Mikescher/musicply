@@ -1,8 +1,8 @@
 package handler
 
 import (
-	"gogs.mikescher.com/BlackForestBytes/goext/ginext"
-	"gogs.mikescher.com/BlackForestBytes/goext/langext"
+	"git.blackforestbytes.com/BlackForestBytes/goext/ginext"
+	"git.blackforestbytes.com/BlackForestBytes/goext/langext"
 	"mikescher.com/musicply/api/responses"
 	"mikescher.com/musicply/logic"
 	"mikescher.com/musicply/models"

@@ -1,7 +1,7 @@
 package models
 
 import (
-	"gogs.mikescher.com/BlackForestBytes/goext/rfctime"
+	"git.blackforestbytes.com/BlackForestBytes/goext/rfctime"
 	"time"
 )
 

@@ -1,8 +1,8 @@
 package mply
 
 import (
-	"gogs.mikescher.com/BlackForestBytes/goext/exerr"
-	"gogs.mikescher.com/BlackForestBytes/goext/langext"
+	"git.blackforestbytes.com/BlackForestBytes/goext/exerr"
+	"git.blackforestbytes.com/BlackForestBytes/goext/langext"
 )
 
 var (

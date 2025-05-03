@@ -2,16 +2,17 @@
 
 package models
 
-import "gogs.mikescher.com/BlackForestBytes/goext/langext"
-import "gogs.mikescher.com/BlackForestBytes/goext/enums"
+import "git.blackforestbytes.com/BlackForestBytes/goext/langext"
+import "git.blackforestbytes.com/BlackForestBytes/goext/enums"
 
-const ChecksumEnumGenerator = "fa176c56648aef784bfce56579c4a729b2f98aa60bab586e31a81f3b3ad96802" // GoExtVersion: 0.0.315
+const ChecksumEnumGenerator = "9995bc9d23da604b04481b6f8347fab1982cdb8b74512ab5c8a67d4d808d9ebb" // GoExtVersion: 0.0.572
 
 // ================================ DeDupKey ================================
 //
 // File:       enums.go
 // StringEnum: true
 // DescrEnum:  false
+// DataEnum:   false
 //
 
 var __DeDupKeyValues = []DeDupKey{
@@ -61,6 +62,14 @@ func (e DeDupKey) VarName() string {
 	return ""
 }
 
+func (e DeDupKey) TypeName() string {
+	return "DeDupKey"
+}
+
+func (e DeDupKey) PackageName() string {
+	return "models"
+}
+
 func (e DeDupKey) Meta() enums.EnumMetaValue {
 	return enums.EnumMetaValue{VarName: e.VarName(), Value: e, Description: nil}
 }
@@ -95,6 +104,7 @@ func DeDupKeyValuesMeta() []enums.EnumMetaValue {
 // File:       enums.go
 // StringEnum: true
 // DescrEnum:  false
+// DataEnum:   false
 //
 
 var __DeDupSelectorValues = []DeDupSelector{
@@ -138,6 +148,14 @@ func (e DeDupSelector) VarName() string {
 	return ""
 }
 
+func (e DeDupSelector) TypeName() string {
+	return "DeDupSelector"
+}
+
+func (e DeDupSelector) PackageName() string {
+	return "models"
+}
+
 func (e DeDupSelector) Meta() enums.EnumMetaValue {
 	return enums.EnumMetaValue{VarName: e.VarName(), Value: e, Description: nil}
 }
@@ -169,6 +187,7 @@ func DeDupSelectorValuesMeta() []enums.EnumMetaValue {
 // File:       enums.go
 // StringEnum: true
 // DescrEnum:  false
+// DataEnum:   false
 //
 
 var __SortKeyValues = []SortKey{
@@ -224,6 +243,14 @@ func (e SortKey) VarName() string {
 	return ""
 }
 
+func (e SortKey) TypeName() string {
+	return "SortKey"
+}
+
+func (e SortKey) PackageName() string {
+	return "models"
+}
+
 func (e SortKey) Meta() enums.EnumMetaValue {
 	return enums.EnumMetaValue{VarName: e.VarName(), Value: e, Description: nil}
 }
@@ -261,6 +288,7 @@ func SortKeyValuesMeta() []enums.EnumMetaValue {
 // File:       jobExecution.go
 // StringEnum: true
 // DescrEnum:  false
+// DataEnum:   false
 //
 
 var __JobStatusValues = []JobStatus{
@@ -302,6 +330,14 @@ func (e JobStatus) VarName() string {
 	return ""
 }
 
+func (e JobStatus) TypeName() string {
+	return "JobStatus"
+}
+
+func (e JobStatus) PackageName() string {
+	return "models"
+}
+
 func (e JobStatus) Meta() enums.EnumMetaValue {
 	return enums.EnumMetaValue{VarName: e.VarName(), Value: e, Description: nil}
 }
@@ -332,6 +368,7 @@ func JobStatusValuesMeta() []enums.EnumMetaValue {
 // File:       jobLog.go
 // StringEnum: true
 // DescrEnum:  false
+// DataEnum:   false
 //
 
 var __JobLogLevelValues = []JobLogLevel{
@@ -377,6 +414,14 @@ func (e JobLogLevel) VarName() string {
 	return ""
 }
 
+func (e JobLogLevel) TypeName() string {
+	return "JobLogLevel"
+}
+
+func (e JobLogLevel) PackageName() string {
+	return "models"
+}
+
 func (e JobLogLevel) Meta() enums.EnumMetaValue {
 	return enums.EnumMetaValue{VarName: e.VarName(), Value: e, Description: nil}
 }
@@ -401,5 +446,17 @@ func JobLogLevelValuesMeta() []enums.EnumMetaValue {
 		JobLogLevelWarn.Meta(),
 		JobLogLevelError.Meta(),
 		JobLogLevelFatal.Meta(),
+	}
+}
+
+// ================================ ================= ================================
+
+func AllPackageEnums() []enums.Enum {
+	return []enums.Enum{
+		DeDupKeyTitle,    // DeDupKey
+		DeDupSelectorAny, // DeDupSelector
+		SortFilename,     // SortKey
+		JobStatusRunning, // JobStatus
+		JobLogLevelDebug, // JobLogLevel
 	}
 }

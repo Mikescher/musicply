@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
+	"git.blackforestbytes.com/BlackForestBytes/goext/ginext"
 	"github.com/rs/zerolog/log"
-	"gogs.mikescher.com/BlackForestBytes/goext/ginext"
 	mply "mikescher.com/musicply"
 	"mikescher.com/musicply/api"
 	"mikescher.com/musicply/db"
